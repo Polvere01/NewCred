@@ -1,11 +1,18 @@
-package br.com.newcred.adapter;
+package br.com.newcred.adapters.controller;
 
+import br.com.newcred.application.usecase.port.IngestWebhook;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class WebhookController {
+
+    private final IngestWebhook ingestWebhook;
+
+    public WebhookController(IngestWebhook ingestWebhook) {
+        this.ingestWebhook = ingestWebhook;
+    }
 
     @GetMapping("/webhook")
     public ResponseEntity<String> verify(
@@ -24,9 +31,10 @@ public class WebhookController {
 
     @PostMapping("/webhook")
     public ResponseEntity<String> receive(@RequestBody String body) {
-        System.out.println("=== WEBHOOK RECEBIDO ===");
+
         System.out.println(body);
-        System.out.println("========================");
+
+        ingestWebhook.executar(body);
         return ResponseEntity.ok("ok");
     }
 
