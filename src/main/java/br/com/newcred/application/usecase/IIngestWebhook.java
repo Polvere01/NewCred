@@ -1,18 +1,18 @@
 package br.com.newcred.application.usecase;
 
-import br.com.newcred.application.usecase.port.EventoWebhookRepository;
+import br.com.newcred.application.usecase.port.IEventoWebhookRepository;
 import br.com.newcred.domain.model.EventoWebhook;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class IngestWebhook implements br.com.newcred.application.usecase.port.IngestWebhook {
+public class IIngestWebhook implements br.com.newcred.application.usecase.port.IIngestWebhook {
 
-    private final EventoWebhookRepository repo;
+    private final IEventoWebhookRepository repo;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public IngestWebhook(EventoWebhookRepository repo) {
+    public IIngestWebhook(IEventoWebhookRepository repo) {
         this.repo = repo;
     }
 

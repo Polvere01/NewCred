@@ -1,6 +1,6 @@
 package br.com.newcred.adapters.controller;
 
-import br.com.newcred.application.usecase.port.IngestWebhook;
+import br.com.newcred.application.usecase.port.IIngestWebhook;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class WebhookController {
 
-    private final IngestWebhook ingestWebhook;
+    private final IIngestWebhook IIngestWebhook;
 
-    public WebhookController(IngestWebhook ingestWebhook) {
-        this.ingestWebhook = ingestWebhook;
+    public WebhookController(IIngestWebhook IIngestWebhook) {
+        this.IIngestWebhook = IIngestWebhook;
     }
 
     @GetMapping("/webhook")
@@ -34,7 +34,7 @@ public class WebhookController {
 
         System.out.println(body);
 
-        ingestWebhook.executar(body);
+        IIngestWebhook.executar(body);
         return ResponseEntity.ok("ok");
     }
 

@@ -1,5 +1,5 @@
 package br.com.newcred.application.usecase.port;
 
-public interface IngestWebhook {
+public interface IIngestWebhook {
     void executar(String payload);
 }
