@@ -8,10 +8,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
-public class IEventoWebhookRepository implements br.com.newcred.application.usecase.port.IEventoWebhookRepository {
+public class EventoWebhookRepository implements br.com.newcred.application.usecase.port.IEventoWebhookRepository {
     private final JdbcTemplate jdbc;
 
-    public IEventoWebhookRepository(JdbcTemplate jdbc) {
+    public EventoWebhookRepository(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
@@ -29,7 +29,7 @@ public class IEventoWebhookRepository implements br.com.newcred.application.usec
     }
 
     @Override
-    public List<EventoWebhook> buscarPendentesParaProcessar(int limite) {
+    public List<EventoWebhook>  buscarPendentesParaProcessar(int limite) {
         // pega um lote de eventos que não foram processados e não estão "reservados"
         // e já reserva marcando processando_em
         String sql = """
