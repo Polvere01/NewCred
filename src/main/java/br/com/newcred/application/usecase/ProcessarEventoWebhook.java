@@ -3,41 +3,40 @@ package br.com.newcred.application.usecase;
 import br.com.newcred.application.usecase.dto.WebhookDtos;
 import br.com.newcred.application.usecase.port.IContatoRepository;
 import br.com.newcred.application.usecase.port.IConversaRepository;
+import br.com.newcred.application.usecase.port.IMensagemRepository;
 import br.com.newcred.application.usecase.port.IProcessarEventoWebhook;
-import br.com.newcred.domain.model.Contato;
 import br.com.newcred.domain.model.EventoWebhook;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import br.com.newcred.application.usecase.dto.WebhookDtos.*;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Objects;
+
+import static br.com.newcred.application.usecase.dto.WebhookDtos.*;
 
 @Service
 public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
 
-    private final IContatoRepository iContatoRepository;
-    private final IConversaRepository iConversaRepository;
+    private final IContatoRepository contatoRepo;
+    private final IConversaRepository conversaRepo;
+    private final IMensagemRepository mensagemRepo;
     private final ObjectMapper mapper;
 
-    public ProcessarEventoWebhook(IContatoRepository iContatoRepository,
-                                  IConversaRepository iConversaRepository,
-                                  ObjectMapper mapper) {
-        this.iContatoRepository = iContatoRepository;
-        this.iConversaRepository = iConversaRepository;
+    public ProcessarEventoWebhook(IContatoRepository contatoRepo, IConversaRepository conversaRepo, IMensagemRepository mensagemRepo, ObjectMapper mapper) {
+        this.contatoRepo = contatoRepo;
+        this.conversaRepo = conversaRepo;
+        this.mensagemRepo = mensagemRepo;
         this.mapper = mapper;
     }
 
     @Override
     public void executar(EventoWebhook evento) {
         try {
-            WebhookPayloadDTO payload =
-                    mapper.readValue(evento.getPayload(), WebhookDtos.WebhookPayloadDTO.class);
+            WebhookPayloadDTO payload = mapper.readValue(evento.getPayload(), WebhookDtos.WebhookPayloadDTO.class);
 
-            if (payload.entry() == null) return;
+            if (payload.entry() == null || payload.entry().isEmpty()) return;
 
             payload.entry().stream()
                     .filter(e -> e.changes() != null)
@@ -52,34 +51,53 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
     }
 
     private void processarValue(ValueDTO value) {
-        // 1) contato (pega do primeiro contact)
-        if (value.contacts() == null || value.contacts().isEmpty()) return;
+        var contact = primeiroContato(value);
+        if (contact == null) return;
 
-        ContactDTO contact = value.contacts().get(0);
         String waId = contact.wa_id();
         if (waId == null || waId.isBlank()) return;
 
         String nome = (contact.profile() != null) ? contact.profile().name() : null;
 
-        long contatoId = salvarOuAtualizarContatoRetornandoId(waId, nome);
+        // 1) UPSERT contato
+        long contatoId = contatoRepo.upsertERetornarId(waId, nome);
 
-        // 2) conversa (usa timestamp da primeira message, se tiver)
-        String ts = null;
-        if (value.messages() != null && !value.messages().isEmpty()) {
-            ts = value.messages().get(0).timestamp();
+        // 2) conversa: timestamp da primeira message (se existir)
+        var msg = primeiraMessage(value);
+        OffsetDateTime ultimaMsgEm = (msg != null) ? parseEpoch(msg.timestamp()) : OffsetDateTime.now(ZoneOffset.UTC);
+
+        // 3) UPSERT conversa e pega id (aqui vale retornar porque vamos usar no save da mensagem IN)
+        long conversaId = conversaRepo.criarOuAtualizar(contatoId, ultimaMsgEm);
+
+        // 4) salva mensagem IN (se tiver message)
+        if (msg != null) {
+            salvarMensagemEntrada(conversaId, msg, ultimaMsgEm);
         }
-        OffsetDateTime ultimaMsgEm = parseEpoch(ts);
-
-        salvarOuAtualizarConversa(contatoId, ultimaMsgEm);
     }
 
-    private long salvarOuAtualizarContatoRetornandoId(String waId, String nome) {
-        return iContatoRepository.upsertERetornarId(waId, nome);
+    private void salvarMensagemEntrada(long conversaId, MessageDTO msg, OffsetDateTime enviadoEm) {
+        String wamid = msg.id();
+        if (wamid == null || wamid.isBlank()) return;
+
+        String from = msg.from();
+        String texto = (msg.text() != null) ? msg.text().body() : null;
+
+        long ts = 0L;
+        if (msg.timestamp() != null && !msg.timestamp().isBlank()) {
+            ts = Long.parseLong(msg.timestamp());
+        }
+
+        mensagemRepo.salvarEntrada(conversaId, wamid, from, texto, ts, enviadoEm);
     }
 
+    private static ContactDTO primeiroContato(ValueDTO value) {
+        if (value.contacts() == null || value.contacts().isEmpty()) return null;
+        return value.contacts().get(0);
+    }
 
-    private long salvarOuAtualizarConversa(long contatoId, OffsetDateTime ultimaMensagemEm) {
-        return iConversaRepository.criarOuAtualizar(contatoId, ultimaMensagemEm);
+    private static MessageDTO primeiraMessage(ValueDTO value) {
+        if (value.messages() == null || value.messages().isEmpty()) return null;
+        return value.messages().get(0);
     }
 
     private static OffsetDateTime parseEpoch(String epochStr) {

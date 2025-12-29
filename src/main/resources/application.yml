@@ -19,6 +19,12 @@ spring:
         ddl-auto: none
       open-in-view: false
 
+meta:
+  base-url: https://graph.facebook.com
+  version: v22.0
+  phone-number-id: ${META_PHONE_NUMBER_ID}
+  token: ${META_TOKEN}
+
 logging:
   level:
     com.zaxxer.hikari: INFO
