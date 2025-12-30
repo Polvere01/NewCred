@@ -1,10 +1,12 @@
 package br.com.newcred.adapters.repository;
 
+import br.com.newcred.adapters.dto.MensagemDTO;
 import br.com.newcred.application.usecase.port.IMensagemRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Repository
 public class MensagemRepository implements IMensagemRepository {
@@ -74,5 +76,26 @@ public class MensagemRepository implements IMensagemRepository {
                 phoneNumberIdDestino,
                 texto
         );
+    }
+
+    public List<MensagemDTO> listarPorConversa(long conversaId) {
+        String sql = """
+            select id, texto, direcao, enviado_em
+            from mensagens
+            where conversa_id = ?
+            order by enviado_em asc, id asc
+        """;
+
+        return jdbc.query(sql, (rs, i) -> {
+            String dirDb = rs.getString("direcao"); // IN / OUT
+            String dirApi = "IN".equalsIgnoreCase(dirDb) ? "ENTRADA" : "SAIDA";
+
+            return new MensagemDTO(
+                    rs.getLong("id"),
+                    rs.getString("texto"),
+                    dirApi,
+                    rs.getObject("enviado_em", OffsetDateTime.class)
+            );
+        }, conversaId);
     }
 }

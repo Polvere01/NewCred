@@ -25,6 +25,10 @@ meta:
   phone-number-id: ${META_PHONE_NUMBER_ID}
   token: ${META_TOKEN}
 
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
 logging:
   level:
     com.zaxxer.hikari: INFO

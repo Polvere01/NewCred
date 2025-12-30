@@ -1,6 +1,9 @@
 package br.com.newcred.application.usecase.port;
 
+import br.com.newcred.adapters.dto.MensagemDTO;
+
 import java.time.OffsetDateTime;
+import java.util.List;
 
 public interface IMensagemRepository {
 
@@ -14,4 +17,6 @@ public interface IMensagemRepository {
     );
 
     void salvarSaida(Long conversaID, String phoneNumberIdDestino, String idDestino, String texto);
+
+    List<MensagemDTO> listarPorConversa(long conversaId);
 }

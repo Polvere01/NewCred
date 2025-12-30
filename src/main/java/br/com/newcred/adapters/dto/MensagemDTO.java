@@ -1,0 +1,10 @@
+package br.com.newcred.adapters.dto;
+
+import java.time.OffsetDateTime;
+
+public record MensagemDTO(
+        long id,
+        String texto,
+        String direcao,
+        OffsetDateTime createdAt
+) {}
