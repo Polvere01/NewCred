@@ -19,6 +19,11 @@ import static br.com.newcred.application.usecase.dto.WebhookDtos.*;
 @Service
 public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
 
+    private final static String TEXTO = "text";
+    private final static String AUDIO = "audio";
+    private final static String IMAGE = "image";
+    private final static String DOCUMENT = "document";
+
     private final IContatoRepository contatoRepo;
     private final IConversaRepository conversaRepo;
     private final IMensagemRepository mensagemRepo;
@@ -86,8 +91,51 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
         if (msg.timestamp() != null && !msg.timestamp().isBlank()) {
             ts = Long.parseLong(msg.timestamp());
         }
+        //TODO criar um estrategy
+        if (TEXTO.equals(msg.type())) {
+            mensagemRepo.salvarEntrada(conversaId, wamid, from, texto, ts, enviadoEm);
+        }
 
-        mensagemRepo.salvarEntrada(conversaId, wamid, from, texto, ts, enviadoEm);
+        if (AUDIO.equals(msg.type())) {
+            mensagemRepo.salvarEntradaMedia(
+                    conversaId,
+                    wamid,
+                    from,
+                    AUDIO,
+                    msg.audio().id(),
+                    ts,
+                    enviadoEm,
+                    null
+            );
+        }
+
+        if (IMAGE.equals(msg.type())) {
+            String mediaId = msg.image().id(); // <-- aqui
+            mensagemRepo.salvarEntradaMedia(
+                    conversaId,
+                    msg.id(),          // wamid
+                    msg.from(),
+                    "image",
+                    mediaId,
+                    Long.parseLong(msg.timestamp()),
+                    parseEpoch(msg.timestamp()),
+                    null
+            );
+        }
+        if (DOCUMENT.equals(msg.type())) {
+            String mediaId = msg.document().id(); // <-- aqui
+            mensagemRepo.salvarEntradaMedia(
+                    conversaId,
+                    msg.id(),          // wamid
+                    msg.from(),
+                    "document",
+                    mediaId,
+                    Long.parseLong(msg.timestamp()),
+                    parseEpoch(msg.timestamp()),
+                    msg.document().filename()
+            );
+        }
+
     }
 
     private static ContactDTO primeiroContato(ValueDTO value) {
