@@ -24,6 +24,8 @@ public class AudioConverter implements IAudioConverter {
             // converte usando ffmpeg
             ProcessBuilder pb = new ProcessBuilder(
                     "ffmpeg",
+                    "-hide_banner",
+                    "-loglevel", "error",
                     "-y", // sobrescreve sem perguntar
                     "-i", tempWebm.toString(),
                     "-c:a", "libopus",
