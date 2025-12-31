@@ -157,4 +157,31 @@ public class MensagemRepository implements IMensagemRepository {
             ));
         }, mensagemId);
     }
+
+    @Override
+    public void salvarSaidaMedia(long conversaId, String wamid, String phoneNumberIdDestino,
+                                 String tipo, String mediaId, OffsetDateTime enviadoEm, String filename) {
+
+        String sql = """
+            insert into mensagens (
+                conversa_id, whatsapp_message_id, direcao,
+                whatsapp_id_origem, phone_number_id_destino,
+                tipo, media_id, nome_arquivo,
+                enviado_em
+            )
+            values (?, ?, 'OUT', null, ?, ?, ?, ?, ?)
+            on conflict (whatsapp_message_id)
+            do nothing
+        """;
+
+        jdbc.update(sql,
+                conversaId,
+                wamid,
+                phoneNumberIdDestino,
+                tipo,
+                mediaId,
+                filename,
+                enviadoEm
+        );
+    }
 }
