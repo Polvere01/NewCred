@@ -13,7 +13,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
@@ -77,7 +81,8 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
             String to,
             String type,
             Text text
-    ) {}
+    ) {
+    }
 
     @Override
     public String getPhoneNumberId() {
@@ -85,20 +90,25 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
     }
 
     public String uploadMedia(byte[] bytes, String mimeType, String filename) {
-        var url = baseUrl + "/" + phoneNumberId + "/media";
+        String url = baseUrl + "/" + phoneNumberId + "/media";
 
         var form = new org.springframework.util.LinkedMultiValueMap<String, Object>();
         form.add("messaging_product", "whatsapp");
-        form.add("type", mimeType);
+        form.add("type", mimeType); // "audio/ogg"
 
         var resource = new org.springframework.core.io.ByteArrayResource(bytes) {
-            @Override public String getFilename() { return filename; }
+            @Override
+            public String getFilename() {
+                return filename; // "audio.ogg"
+            }
         };
 
-        var headers = new org.springframework.http.HttpHeaders();
-        headers.setContentType(org.springframework.http.MediaType.parseMediaType(mimeType));
+        var fileHeaders = new org.springframework.http.HttpHeaders();
+        fileHeaders.setContentType(org.springframework.http.MediaType.parseMediaType(mimeType));
+        fileHeaders.setContentDispositionFormData("file", filename);
 
-        form.add("file", new org.springframework.http.HttpEntity<>(resource, headers));
+        var filePart = new org.springframework.http.HttpEntity<>(resource, fileHeaders);
+        form.add("file", filePart);
 
         String raw = rest.post()
                 .uri(url)
@@ -108,19 +118,22 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
                 .retrieve()
                 .body(String.class);
 
-        // parseia raw e retorna mediaId (igual você fez no send)
         try {
-            var resp = mapper.readTree(raw);
-            String id = resp.path("id").asText(null);
-            if (id == null) throw new RuntimeException("Meta não retornou media id. raw=" + raw);
+            // resposta do upload é tipo { "id": "...." }
+            var node = mapper.readTree(raw);
+            var id = node.path("id").asText(null);
+            if (id == null || id.isBlank()) {
+                throw new RuntimeException("Meta não retornou media id. Resposta=" + raw);
+            }
             return id;
         } catch (Exception e) {
-            throw new RuntimeException("Erro lendo resposta upload media. raw=" + raw, e);
+            throw new RuntimeException("Erro lendo resposta do upload. Resposta=" + raw, e);
         }
     }
 
 
-    public record UploadMediaResponse(String id) {}
+    public record UploadMediaResponse(String id) {
+    }
 
     @Override
     public String enviarAudioPorMediaId(String to, String mediaId) {
@@ -152,28 +165,25 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
         }
     }
 
-
-    private HttpHeaders fileHeaders(MultipartFile file) {
-        HttpHeaders h = new HttpHeaders();
-        h.setContentType(MediaType.parseMediaType(
-                file.getContentType() != null ? file.getContentType() : "audio/ogg"
-        ));
-        return h;
-    }
-
     public record SendAudioRequest(
             String messaging_product,
             String recipient_type,
             String to,
             String type,
             Audio audio
-    ) {}
-    public record Audio(String id) {}
+    ) {
+    }
 
-    public record Text(boolean preview_url, String body) {}
+    public record Audio(String id) {
+    }
+
+    public record Text(boolean preview_url, String body) {
+    }
 
     // ✅ AGORA É RECORD: resp.messages() existe
-    public record SendTextResponse(List<MessageId> messages) {}
+    public record SendTextResponse(List<MessageId> messages) {
+    }
 
-    public record MessageId(String id) {}
+    public record MessageId(String id) {
+    }
 }

@@ -26,12 +26,19 @@ public class AudioConverter implements IAudioConverter {
                     "ffmpeg",
                     "-hide_banner",
                     "-loglevel", "error",
-                    "-y", // sobrescreve sem perguntar
+                    "-y",
                     "-i", tempWebm.toString(),
+                    "-vn",
+                    "-ac", "1",
                     "-c:a", "libopus",
-                    "-b:a", "64k",
+                    "-b:a", "24k",
+                    "-application", "voip",
+                    "-frame_duration", "20",
+                    "-af", "aresample=async=1:first_pts=0",
+                    "-f", "ogg",
                     tempOgg.toString()
             );
+
             pb.inheritIO();
             Process process = pb.start();
             int exitCode = process.waitFor();
