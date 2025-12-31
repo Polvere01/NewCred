@@ -31,14 +31,15 @@ public class WebhookDtos {
             String type,
             AudioDTO audio,
             ImageDto image,
-            DocumentDTO document
-
+            DocumentDTO document,
+            VideoDto video
 
     ) {}
     public record TextDTO(String body) {}
     public record AudioDTO(String id, String myne_type) {}
     public record ImageDto(String id, String mime_type) {}
     public record DocumentDTO(String id, String filename, String mime_type) {}
+    public record VideoDto(String id, String filename, String mime_type) {}
 
     public record StatusDTO(
             String id,

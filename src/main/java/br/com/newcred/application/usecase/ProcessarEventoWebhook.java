@@ -23,6 +23,7 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
     private final static String AUDIO = "audio";
     private final static String IMAGE = "image";
     private final static String DOCUMENT = "document";
+    private final static String VIDEO = "video";
 
     private final IContatoRepository contatoRepo;
     private final IConversaRepository conversaRepo;
@@ -133,6 +134,20 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
                     Long.parseLong(msg.timestamp()),
                     parseEpoch(msg.timestamp()),
                     msg.document().filename()
+            );
+        }
+
+        if (VIDEO.equals(msg.type())) {
+            String mediaId = msg.video().id(); // <-- aqui
+            mensagemRepo.salvarEntradaMedia(
+                    conversaId,
+                    msg.id(),          // wamid
+                    msg.from(),
+                    "video",
+                    mediaId,
+                    Long.parseLong(msg.timestamp()),
+                    parseEpoch(msg.timestamp()),
+                    null
             );
         }
 
