@@ -36,3 +36,8 @@ app:
 logging:
   level:
     com.zaxxer.hikari: INFO
+
+security:
+  jwt:
+    secret: "9f3c7a1d8e4b0a6f2d91c5e8a7b3f4c6e2d0a9b8c1f7e5d4a6b9c0e2f1a8d7c"
+    expirationMinutes: 720

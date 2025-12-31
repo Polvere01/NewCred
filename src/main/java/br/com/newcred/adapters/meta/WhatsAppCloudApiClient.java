@@ -1,23 +1,13 @@
-package br.com.newcred.adapters.client;
+package br.com.newcred.adapters.meta;
 
 import br.com.newcred.application.usecase.port.IWhatsAppCloudApiClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.security.MessageDigest;
-import java.util.HexFormat;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component
 public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {

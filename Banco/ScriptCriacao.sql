@@ -16,6 +16,14 @@ create table if not exists conversas (
   unique (contato_id)
 );
 
+ALTER TABLE conversas
+ADD COLUMN operador_id BIGINT;
+
+ALTER TABLE conversas
+ADD CONSTRAINT fk_conversas_operador
+FOREIGN KEY (operador_id)
+REFERENCES operadores(id);
+
 create index if not exists idx_conversas_ultima_mensagem
   on conversas (ultima_mensagem_em desc);
 
@@ -49,3 +57,27 @@ create table if not exists eventos_webhook (
   processado_em timestamptz null,
   erro_processamento text null
 );
+
+
+CREATE TABLE operadores (
+    id BIGSERIAL PRIMARY KEY,
+
+    nome VARCHAR(120) NOT NULL,
+    email VARCHAR(180) NOT NULL UNIQUE,
+
+    senha_hash VARCHAR(255) NOT NULL,
+
+    role VARCHAR(30) NOT NULL DEFAULT 'OPERADOR',
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
+//crie para mim delete sem where em todas as tabelas 
+DELETE FROM mensagens;
+DELETE FROM conversas;
+DELETE FROM contatos;
+DELETE FROM eventos_webhook;
+DELETE FROM operadores;

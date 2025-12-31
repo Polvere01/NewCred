@@ -1,4 +1,4 @@
-package br.com.newcred.adapters.client;
+package br.com.newcred.adapters.meta;
 
 import br.com.newcred.adapters.dto.RetrieveMediaResponseDto;
 import br.com.newcred.application.usecase.port.IMetaMediaGateway;

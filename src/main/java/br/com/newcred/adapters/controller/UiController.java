@@ -1,10 +1,13 @@
 package br.com.newcred.adapters.controller;
 
+import br.com.newcred.adapters.config.security.OperadorContext;
 import br.com.newcred.adapters.dto.ConversaListaDTO;
 import br.com.newcred.adapters.dto.MensagemDTO;
 import br.com.newcred.adapters.repository.ConversaListaRepository;
 import br.com.newcred.application.usecase.dto.MensagensRequestDto;
 import br.com.newcred.application.usecase.dto.MensagensResponseDto;
+import br.com.newcred.application.usecase.dto.CriarOperadorRequestDto;
+import br.com.newcred.application.usecase.dto.CriarOperadorResponseDto;
 import br.com.newcred.application.usecase.port.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +46,8 @@ public class UiController {
 
     @GetMapping
     public List<ConversaListaDTO> listar() {
-        return repo.listar();
+        long operadorId = OperadorContext.getOperadorId();
+        return repo.listarPorOperador(operadorId);
     }
 
     @GetMapping("/{id}/mensagens")
@@ -129,6 +133,5 @@ public class UiController {
                 "mediaId", resp.mediaId()
         );
     }
-
 
 }

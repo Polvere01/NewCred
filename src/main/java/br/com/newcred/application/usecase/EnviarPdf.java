@@ -1,4 +1,4 @@
-package br.com.newcred.application.usecase.port;
+package br.com.newcred.application.usecase;
 
 import br.com.newcred.application.usecase.dto.EnviarPdfResponseDto;
 import br.com.newcred.application.usecase.port.IEnviarPdf;
