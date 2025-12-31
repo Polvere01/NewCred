@@ -9,13 +9,13 @@ import org.springframework.web.client.RestClient;
 import java.io.InputStream;
 
 @Component
-public class WhatsAppCloudApiClientMedia implements IMetaMediaGateway {
+public class WhatsAppCloudApiClientMediaDownload implements IMetaMediaGateway {
 
     private final RestClient rest;
     private final String baseUrl;
     private final String phoneNumberId;
 
-    public WhatsAppCloudApiClientMedia(
+    public WhatsAppCloudApiClientMediaDownload(
             RestClient.Builder builder,
             @Value("${meta.base-url:https://graph.facebook.com}") String baseUrl,
             @Value("${meta.version}") String version,
@@ -46,7 +46,6 @@ public class WhatsAppCloudApiClientMedia implements IMetaMediaGateway {
 
     @Override
     public InputStream baixarMediaStream(String mediaUrl) {
-        // lookaside precisa do Authorization também
         var resource = rest.get()
                 .uri(mediaUrl)
                 .retrieve()

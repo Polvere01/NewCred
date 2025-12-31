@@ -165,6 +165,47 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
         }
     }
 
+    @Override
+    public String enviarVideoPorMediaId(String to, String mediaId) {
+        String url = baseUrl + "/" + phoneNumberId + "/messages";
+
+        var payload = new SendVideoRequest(
+                "whatsapp",
+                "individual",
+                to,
+                "video",
+                new Video(mediaId)
+        );
+
+        String raw = rest.post()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(payload)
+                .retrieve()
+                .body(String.class);
+
+        try {
+            SendTextResponse resp = mapper.readValue(raw, SendTextResponse.class);
+            if (resp.messages() == null || resp.messages().isEmpty() || resp.messages().get(0).id() == null) {
+                throw new RuntimeException("Meta não retornou wamid. Resposta=" + raw);
+            }
+
+            //todo verificas get0
+            return resp.messages().get(0).id();
+        } catch (Exception e) {
+            throw new RuntimeException("Erro lendo resposta do send video. Resposta=" + raw, e);
+        }
+    }
+
+    public record SendVideoRequest(
+            String messaging_product,
+            String recipient_type,
+            String to,
+            String type,
+            Video video
+    ) {}
+
+
     public record SendAudioRequest(
             String messaging_product,
             String recipient_type,
@@ -174,8 +215,95 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
     ) {
     }
 
+    @Override
+    public String enviarImagemPorMediaId(String to, String mediaId, String caption) {
+        String url = baseUrl + "/" + phoneNumberId + "/messages";
+
+        var image = (caption == null || caption.isBlank())
+                ? new Image(mediaId, null)
+                : new Image(mediaId, caption);
+
+        var payload = new SendImageRequest(
+                "whatsapp",
+                "individual",
+                to,
+                "image",
+                image
+        );
+
+        String raw = rest.post()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(payload)
+                .retrieve()
+                .body(String.class);
+
+        try {
+            SendTextResponse resp = mapper.readValue(raw, SendTextResponse.class);
+            if (resp.messages() == null || resp.messages().isEmpty() || resp.messages().get(0).id() == null) {
+                throw new RuntimeException("Meta não retornou wamid. Resposta=" + raw);
+            }
+            return resp.messages().get(0).id();
+        } catch (Exception e) {
+            throw new RuntimeException("Erro lendo resposta do send image. Resposta=" + raw, e);
+        }
+    }
+
+    public record SendImageRequest(
+            String messaging_product,
+            String recipient_type,
+            String to,
+            String type,
+            Image image
+    ) {}
+
+    @Override
+    public String enviarDocumentoPorMediaId(String to, String mediaId, String filename, String caption) {
+        String url = baseUrl + "/" + phoneNumberId + "/messages";
+
+        var doc = new Document(mediaId, filename, (caption == null || caption.isBlank()) ? null : caption);
+
+        var payload = new SendDocumentRequest(
+                "whatsapp",
+                "individual",
+                to,
+                "document",
+                doc
+        );
+
+        String raw = rest.post()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(payload)
+                .retrieve()
+                .body(String.class);
+
+        try {
+            SendTextResponse resp = mapper.readValue(raw, SendTextResponse.class);
+            if (resp.messages() == null || resp.messages().isEmpty() || resp.messages().get(0).id() == null) {
+                throw new RuntimeException("Meta não retornou wamid. Resposta=" + raw);
+            }
+            return resp.messages().get(0).id();
+        } catch (Exception e) {
+            throw new RuntimeException("Erro lendo resposta do send document. Resposta=" + raw, e);
+        }
+    }
+
+    public record SendDocumentRequest(
+            String messaging_product,
+            String recipient_type,
+            String to,
+            String type,
+            Document document
+    ) {}
+
+    public record Document(String id, String filename, String caption) {}
+
+    public record Image(String id, String caption) {}
+
     public record Audio(String id) {
     }
+    public record Video(String id) {}
 
     public record Text(boolean preview_url, String body) {
     }
