@@ -82,7 +82,8 @@ public class UiController {
         var resp = enviarAudio.executar(conversaId, waIdDestino, audio);
         return Map.of(
                 "wamid", resp.wamid(),
-                "mediaId", resp.mediaId()
+                "mediaId", resp.mediaId(),
+                "mensagemId", resp.mensagemId()
         );
     }
 
@@ -96,7 +97,8 @@ public class UiController {
         var resp = enviarVideo.executar(conversaId, waIdDestino, video);
         return Map.of(
                 "wamid", resp.wamid(),
-                "mediaId", resp.mediaId()
+                "mediaId", resp.mediaId(),
+                "mensagemId", resp.mensagemId()
         );
     }
 
@@ -110,7 +112,8 @@ public class UiController {
         var resp = enviarImagem.executar(conversaId, waIdDestino, imagem, caption);
         return Map.of(
                 "wamid", resp.wamid(),
-                "mediaId", resp.mediaId()
+                "mediaId", resp.mediaId(),
+                "mensagemId", resp.mensagemId()
         );
     }
 
@@ -124,7 +127,8 @@ public class UiController {
         var resp = enviarPdf.executar(conversaId, waIdDestino, pdf, caption);
         return Map.of(
                 "wamid", resp.wamid(),
-                "mediaId", resp.mediaId()
+                "mediaId", resp.mediaId(),
+                "mensagemId", resp.mensagemId()
         );
     }
 

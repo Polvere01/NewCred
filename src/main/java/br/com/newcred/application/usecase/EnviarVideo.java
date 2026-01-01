@@ -43,7 +43,7 @@ public class EnviarVideo implements IEnviarVideo {
         var wamid = metaClient.enviarVideoPorMediaId(waIdDestino, mediaId);
 
         // 3) salva
-        mensagemRepo.salvarSaidaMedia(
+        var mensagemId = mensagemRepo.salvarSaidaMedia(
                 conversaId,
                 wamid,
                 metaClient.getPhoneNumberId(),
@@ -53,6 +53,6 @@ public class EnviarVideo implements IEnviarVideo {
                 conv.filename()
         );
 
-        return new EnviarVideoResponseDto(wamid, mediaId);
+        return new EnviarVideoResponseDto(wamid, mediaId, String.valueOf(mensagemId));
     }
 }

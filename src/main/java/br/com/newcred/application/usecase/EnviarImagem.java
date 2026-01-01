@@ -46,7 +46,7 @@ public class EnviarImagem implements IEnviarImagem {
             var wamid = metaClient.enviarImagemPorMediaId(waIdDestino, mediaId, caption);
 
             // 3) salva
-            mensagemRepo.salvarSaidaMedia(
+            var messagemId = mensagemRepo.salvarSaidaMedia(
                     conversaId,
                     wamid,
                     metaClient.getPhoneNumberId(),
@@ -56,7 +56,7 @@ public class EnviarImagem implements IEnviarImagem {
                     filename
             );
 
-            return new EnviarImagemResponseDto(wamid, mediaId);
+            return new EnviarImagemResponseDto(wamid, mediaId, String.valueOf(messagemId));
 
         } catch (Exception e) {
             throw new RuntimeException("Falha ao enviar imagem", e);

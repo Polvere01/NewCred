@@ -1,3 +1,3 @@
 package br.com.newcred.application.usecase.dto;
 
-public record EnviarPdfResponseDto(String wamid, String mediaId) {}
+public record EnviarPdfResponseDto(String wamid, String mediaId, String mensagemId) {}

@@ -159,7 +159,7 @@ public class MensagemRepository implements IMensagemRepository {
     }
 
     @Override
-    public void salvarSaidaMedia(long conversaId, String wamid, String phoneNumberIdDestino,
+    public Long salvarSaidaMedia(long conversaId, String wamid, String phoneNumberIdDestino,
                                  String tipo, String mediaId, OffsetDateTime enviadoEm, String filename) {
 
         String sql = """
@@ -172,9 +172,13 @@ public class MensagemRepository implements IMensagemRepository {
             values (?, ?, 'OUT', null, ?, ?, ?, ?, ?)
             on conflict (whatsapp_message_id)
             do nothing
+            returning id
         """;
 
-        jdbc.update(sql,
+        return jdbc.query(sql, rs -> {
+                    if (rs.next()) return rs.getLong("id");
+                    return null;
+                },
                 conversaId,
                 wamid,
                 phoneNumberIdDestino,
@@ -183,5 +187,6 @@ public class MensagemRepository implements IMensagemRepository {
                 filename,
                 enviadoEm
         );
+
     }
 }

@@ -43,7 +43,7 @@ public class EnviarAudio implements IEnviarAudio {
         var wamid = metaClient.enviarAudioPorMediaId(waIdDestino, mediaId);
 
         // 3) salva no banco (OUT)
-        mensagemRepo.salvarSaidaMedia(
+        var mensagemId = mensagemRepo.salvarSaidaMedia(
                 conversaId,
                 wamid,
                 metaClient.getPhoneNumberId(),
@@ -53,6 +53,6 @@ public class EnviarAudio implements IEnviarAudio {
                 conv.filename() // ou audio.getOriginalFilename(), mas conv é mais seguro
         );
 
-        return new EnviarAudioResponseDto(wamid, mediaId);
+        return new EnviarAudioResponseDto(wamid, mediaId, String.valueOf(mensagemId));
     }
 }

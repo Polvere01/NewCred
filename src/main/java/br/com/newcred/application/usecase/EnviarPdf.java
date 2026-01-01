@@ -49,7 +49,7 @@ public class EnviarPdf implements IEnviarPdf {
             var wamid = metaClient.enviarDocumentoPorMediaId(waIdDestino, mediaId, filename, caption);
 
             // 3) salva
-            mensagemRepo.salvarSaidaMedia(
+            var mensagemId = mensagemRepo.salvarSaidaMedia(
                     conversaId,
                     wamid,
                     metaClient.getPhoneNumberId(),
@@ -59,7 +59,7 @@ public class EnviarPdf implements IEnviarPdf {
                     filename
             );
 
-            return new EnviarPdfResponseDto(wamid, mediaId);
+            return new EnviarPdfResponseDto(wamid, mediaId, String.valueOf(mensagemId));
 
         } catch (Exception e) {
             throw new RuntimeException("Falha ao enviar PDF", e);
