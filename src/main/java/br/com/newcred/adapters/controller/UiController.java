@@ -9,6 +9,7 @@ import br.com.newcred.application.usecase.dto.MensagensResponseDto;
 import br.com.newcred.application.usecase.dto.CriarOperadorRequestDto;
 import br.com.newcred.application.usecase.dto.CriarOperadorResponseDto;
 import br.com.newcred.application.usecase.port.*;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,20 +63,13 @@ public class UiController {
 
 
     @GetMapping("/{id}/media")
-    public ResponseEntity<StreamingResponseBody> baixar(@PathVariable long id) {
-
+    public ResponseEntity<InputStreamResource> baixar(@PathVariable long id) {
         var midiaDto = baixarMidia.executar(id);
 
-        StreamingResponseBody body = out -> {
-            try (var in = midiaDto.stream()) {
-                in.transferTo(out);
-            }
-        };
-
         return ResponseEntity.ok()
-                .contentType(org.springframework.http.MediaType.parseMediaType(midiaDto.mimeType()))
+                .contentType(MediaType.parseMediaType(midiaDto.mimeType()))
                 .header("Cache-Control", "no-store")
-                .body(body);
+                .body(new InputStreamResource(midiaDto.stream()));
     }
 
 
