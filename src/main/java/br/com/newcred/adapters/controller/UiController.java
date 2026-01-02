@@ -42,10 +42,17 @@ public class UiController {
         this.mensagemRepository = mensagemRepository;
     }
 
+    //TOdo arrumar esse case com caracteres fixos
     @GetMapping
     public List<ConversaListaDTO> listar() {
-        long operadorId = OperadorContext.getOperadorId();
-        return repo.listarPorOperador(operadorId);
+        long userId = OperadorContext.getOperadorId();
+        String role = OperadorContext.getRole(); // "ADMIN" | "SUPERVISOR" | "OPERADOR"
+
+        return switch (role) {
+            case "ADMIN" -> repo.listar();
+            case "SUPERVISOR" -> repo.listarPorSupervisor(userId);
+            default -> repo.listarPorOperador(userId);
+        };
     }
 
     @GetMapping("/{id}/mensagens")

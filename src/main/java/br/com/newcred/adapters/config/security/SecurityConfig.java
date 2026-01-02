@@ -18,7 +18,7 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/webhook/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/operadores").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/operadores").hasAnyRole("ADMIN", "SUPERVISOR")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

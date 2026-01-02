@@ -23,19 +23,19 @@ public class OperadorRepository implements IOperadorRepository {
     }
 
     @Override
-    public Long inserir(String nome, String email, String senhaHash, String role) {
+    public Long inserir(String nome, String email, String senhaHash, String role, Long supervisorId) {
         String sql = """
-            insert into operadores (nome, email, senha_hash, role, ativo)
-            values (?, ?, ?, ?, true)
+            insert into operadores (nome, email, senha_hash, role, ativo, supervisor_id)
+            values (?, ?, ?, ?, true, ?)
             returning id
         """;
-        return jdbc.queryForObject(sql, Long.class, nome, email, senhaHash, role);
+        return jdbc.queryForObject(sql, Long.class, nome, email, senhaHash, role, supervisorId);
     }
 
     @Override
     public Optional<OperadorResumo> buscarPorId(Long id) {
         String sql = """
-            select id, nome, email, role, ativo
+            select id, nome, email, role, ativo, supervisor_id
             from operadores
             where id = ?
         """;
@@ -47,7 +47,8 @@ public class OperadorRepository implements IOperadorRepository {
                     rs.getString("nome"),
                     rs.getString("email"),
                     rs.getString("role"),
-                    rs.getBoolean("ativo")
+                    rs.getBoolean("ativo"),
+                    rs.getLong("supervisor_id")
             ));
         }, id);
     }

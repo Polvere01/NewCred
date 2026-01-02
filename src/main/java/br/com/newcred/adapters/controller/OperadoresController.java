@@ -20,7 +20,7 @@ public class OperadoresController {
         this.criarOperador = criarOperador;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     @PostMapping
     public ResponseEntity<CriarOperadorResponseDto> criar(@RequestBody CriarOperadorRequestDto dto) {
         var resp = criarOperador.executar(dto);

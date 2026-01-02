@@ -5,5 +5,6 @@ public record CriarOperadorResponseDto(
         String nome,
         String email,
         String role,
-        Boolean ativo
+        Boolean ativo,
+        Long supervisorId
 ) {}

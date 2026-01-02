@@ -4,5 +4,6 @@ public record CriarOperadorRequestDto(
         String nome,
         String email,
         String senha,
-        String role // "OPERADOR" ou "ADMIN" (pode ignorar e forçar OPERADOR)
+        String role,
+        Long supervisorId
 ) {}

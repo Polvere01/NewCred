@@ -42,6 +42,37 @@ public class ConversaListaRepository {
         );
     }
 
+    public List<ConversaListaDTO> listarPorSupervisor(long supervisorId) {
+        String sql = """
+        select
+          c.id as id,
+          ct.whatsapp_id as nome,
+          coalesce(m.texto, '') as "ultimaMensagem"
+        from conversas c
+        join contatos ct on ct.id = c.contato_id
+        join operadores o on o.id = c.operador_id
+        left join lateral (
+          select texto, enviado_em
+          from mensagens
+          where conversa_id = c.id
+          order by enviado_em desc
+          limit 1
+        ) m on true
+        where o.supervisor_id = ?
+           or c.operador_id = ?
+        order by c.ultima_mensagem_em desc nulls last, c.atualizado_em desc
+    """;
+
+        return jdbc.query(sql, (rs, i) ->
+                        new ConversaListaDTO(
+                                rs.getLong("id"),
+                                rs.getString("nome"),
+                                rs.getString("ultimaMensagem")
+                        ),
+                supervisorId, supervisorId
+        );
+    }
+
     public List<ConversaListaDTO> listarPorOperador(long operadorId) {
         String sql = """
             select
