@@ -6,15 +6,12 @@ import br.com.newcred.adapters.dto.MensagemDTO;
 import br.com.newcred.adapters.repository.ConversaListaRepository;
 import br.com.newcred.application.usecase.dto.MensagensRequestDto;
 import br.com.newcred.application.usecase.dto.MensagensResponseDto;
-import br.com.newcred.application.usecase.dto.CriarOperadorRequestDto;
-import br.com.newcred.application.usecase.dto.CriarOperadorResponseDto;
 import br.com.newcred.application.usecase.port.*;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.List;
 import java.util.Map;
@@ -131,5 +128,6 @@ public class UiController {
                 "mensagemId", resp.mensagemId()
         );
     }
+
 
 }

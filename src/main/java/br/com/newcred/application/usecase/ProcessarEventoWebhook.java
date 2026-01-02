@@ -8,6 +8,7 @@ import br.com.newcred.application.usecase.port.IProcessarEventoWebhook;
 import br.com.newcred.domain.model.EventoWebhook;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -37,6 +38,7 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
         this.mapper = mapper;
     }
 
+    @Transactional
     @Override
     public void executar(EventoWebhook evento) {
         try {
@@ -74,6 +76,9 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
 
         // 3) UPSERT conversa e pega id (aqui vale retornar porque vamos usar no save da mensagem IN)
         long conversaId = conversaRepo.criarOuAtualizar(contatoId, ultimaMsgEm);
+
+        // 4) Atribui conversa ao operador
+        conversaRepo.atribuirOperadorSeNulo(conversaId);
 
         // 4) salva mensagem IN (se tiver message)
         if (msg != null) {

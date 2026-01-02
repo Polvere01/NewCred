@@ -81,3 +81,10 @@ DELETE FROM conversas;
 DELETE FROM contatos;
 DELETE FROM eventos_webhook;
 DELETE FROM operadores;
+
+
+select * from contatos;
+select * from conversas;
+select * from mensagens;
+select * from eventos_webhook;
+select * from operadores;

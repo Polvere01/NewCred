@@ -12,6 +12,7 @@ import java.util.List;
 @Component
 public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
 
+    //TODO QUEBRAR EM CLASSES MENORES
     private final RestClient rest;
     private final String baseUrl;
     private final String phoneNumberId;
