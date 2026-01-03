@@ -28,7 +28,7 @@ public class ConversaRepository implements IConversaRepository {
             returning id
         """;
 
-        Long id = jdbc.queryForObject(sql, Long.class, contatoId, ultimaMensagemEm, phoneNumberId);
+        Long id = jdbc.queryForObject(sql, Long.class, contatoId, phoneNumberId, ultimaMensagemEm);
         return id != null ? id : -1L;
     }
 
