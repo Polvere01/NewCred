@@ -1,6 +1,5 @@
 package br.com.newcred.application.usecase;
 
-import br.com.newcred.adapters.meta.WhatsAppCloudClient;
 import br.com.newcred.application.usecase.dto.DisparoResultadoDto;
 import br.com.newcred.application.usecase.dto.FalhaDto;
 import br.com.newcred.application.usecase.port.IDispararTemplateEmMassa;
@@ -26,19 +25,19 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
     }
 
     @Override
-    public DisparoResultadoDto executar(String template, MultipartFile file) {
+    public DisparoResultadoDto executar(String template, MultipartFile file, String phoneNumberId) {
         String filename = (file.getOriginalFilename() == null) ? "" : file.getOriginalFilename().toLowerCase();
 
         if (filename.endsWith(".csv")) {
-            return processarCsv(template, file);
+            return processarCsv(template, file, phoneNumberId);
         }
 
         // default: tenta xlsx (ou qualquer coisa excel)
-        return processarXlsx(template, file);
+        return processarXlsx(template, file, phoneNumberId);
     }
 
     //TODO TENTAR ENTENDER DEPOIS DIFICIL DEMAIS
-    public DisparoResultadoDto processarXlsx(String template, MultipartFile file) {
+    public DisparoResultadoDto processarXlsx(String template, MultipartFile file, String phoneNumberId) {
         var erros = new ArrayList<FalhaDto>();
         int total = 0;
         int enviados = 0;
@@ -84,11 +83,12 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
                 }
 
                 try {
-                    waClient.enviarTemplate(template, telefone, primeiroNome);
+                    //melhorar o phonenumberid
+                    waClient.enviarTemplate(template, telefone, primeiroNome, "956785587513587");
                     enviados++;
 
                     // 👉 opcional: “freio” simples pra não estourar limite
-                    Thread.sleep(120); // ajuste depois
+                    Thread.sleep(500); // ajuste depois
                 } catch (Exception ex) {
                     erros.add(new FalhaDto(telefone, nomeRaw, ex.getMessage()));
                 }
@@ -101,7 +101,7 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
         }
     }
 
-    private DisparoResultadoDto processarCsv(String template, MultipartFile file) {
+    private DisparoResultadoDto processarCsv(String template, MultipartFile file, String phoneNumberId) {
         var erros = new ArrayList<FalhaDto>();
         int total = 0;
         int enviados = 0;
@@ -144,7 +144,7 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
                 }
 
                 try {
-                    waClient.enviarTemplate(template, telefone, primeiroNome);
+                    waClient.enviarTemplate(template, telefone, primeiroNome, phoneNumberId);
                     enviados++;
                     Thread.sleep(120);
                 } catch (Exception ex) {

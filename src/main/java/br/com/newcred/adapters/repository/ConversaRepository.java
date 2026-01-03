@@ -17,23 +17,23 @@ public class ConversaRepository implements IConversaRepository {
     }
 
     @Override
-    public long criarOuAtualizar(long contatoId, OffsetDateTime ultimaMensagemEm) {
+    public long criarOuAtualizar(long contatoId, OffsetDateTime ultimaMensagemEm, String phoneNumberId) {
         String sql = """
-            insert into conversas (contato_id, status, ultima_mensagem_em)
-            values (?, 'ABERTA', ?)
-            on conflict (contato_id)
+            insert into conversas (contato_id, phone_number_id, status, ultima_mensagem_em)
+            values (?, ?, 'ABERTA', ?)
+            on conflict (contato_id, phone_number_id)
             do update set
               ultima_mensagem_em = excluded.ultima_mensagem_em,
               atualizado_em = now()
             returning id
         """;
 
-        Long id = jdbc.queryForObject(sql, Long.class, contatoId, ultimaMensagemEm);
+        Long id = jdbc.queryForObject(sql, Long.class, contatoId, ultimaMensagemEm, phoneNumberId);
         return id != null ? id : -1L;
     }
 
     @Override
-    public void atribuirOperadorSeNulo(long conversaId) {
+    public void atribuirOperadorSeNulo(long conversaId, String phoneNumberId) {
 
         // 1) trava a linha da conversa e pega operador atual
         Long operadorAtual = jdbc.queryForObject("""
@@ -47,14 +47,20 @@ public class ConversaRepository implements IConversaRepository {
 
         // 2) escolhe próximo operador (round-robin por last_assigned_at)
         Long opId = jdbc.queryForObject("""
-            select id
-            from operadores
-            where ativo = true
-              and role = 'OPERADOR'
-            order by last_assigned_at nulls first, id
-            limit 1
-            for update skip locked
-        """, Long.class);
+          select o.id
+          from operadores o
+          where o.ativo = true
+            and o.role = 'OPERADOR'
+            and exists (
+              select 1
+              from operador_phone_numbers opn
+              where opn.operador_id = o.id
+                and opn.phone_number_id = ?
+            )
+          order by o.last_assigned_at nulls first, o.id
+          limit 1
+          for update of o skip locked
+        """, Long.class, phoneNumberId);
 
         if (opId == null) return; // sem operador disponível
 

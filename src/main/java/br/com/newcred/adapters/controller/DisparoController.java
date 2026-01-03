@@ -20,9 +20,10 @@ public class DisparoController {
     @PostMapping(value="/template", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DisparoResultadoDto> dispararTemplate(
             @RequestParam("template") String template,
-            @RequestPart("file") MultipartFile file
+            @RequestPart("file") MultipartFile file,
+            @RequestParam("phoneNumberId") String phoneNumberId
     ) {
-        var resp = disparar.executar(template, file);
+        var resp = disparar.executar(template, file, phoneNumberId);
         return ResponseEntity.ok(resp);
     }
 }

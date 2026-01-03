@@ -13,27 +13,23 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class WhatsAppCloudClient implements IWhatsAppCloudClient {
+public class WhatsAppCloudDisparoClient implements IWhatsAppCloudClient {
 
     private final RestTemplate rest;
     private final String token;
     private final String version;
-    private final String phoneNumberId;
 
-    public WhatsAppCloudClient(
+    public WhatsAppCloudDisparoClient(
             RestTemplateBuilder builder,
             @Value("${meta.token}") String token,
-            @Value("${meta.version}") String version,
-            @Value("${meta.phone-number-id}") String phoneNumberId
+            @Value("${meta.version}") String version
     ) {
         this.rest = builder.build();
         this.token = token;
         this.version = version;
-        this.phoneNumberId = phoneNumberId;
     }
 
-    public void enviarTemplate(String templateName, String to, String firstName) {
-        //todo colocar como parametro
+    public void enviarTemplate(String templateName, String to, String firstName, String phoneNumberId) {
         String url = "https://graph.facebook.com/" + version + "/" + phoneNumberId + "/messages";
 
         Map<String, Object> body = Map.of(

@@ -5,5 +5,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface IDispararTemplateEmMassa {
 
-    DisparoResultadoDto executar(String template, MultipartFile file);
+    DisparoResultadoDto executar(String template, MultipartFile file, String phoneNumberId);
 }

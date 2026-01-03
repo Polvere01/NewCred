@@ -65,6 +65,9 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
         String waId = contact.wa_id();
         if (waId == null || waId.isBlank()) return;
 
+        String phoneNumberId = (value.metadata() != null) ? value.metadata().phone_number_id() : null;
+        if (phoneNumberId == null || phoneNumberId.isBlank()) return;
+
         String nome = (contact.profile() != null) ? contact.profile().name() : null;
 
         // 1) UPSERT contato
@@ -75,10 +78,10 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
         OffsetDateTime ultimaMsgEm = (msg != null) ? parseEpoch(msg.timestamp()) : OffsetDateTime.now(ZoneOffset.UTC);
 
         // 3) UPSERT conversa e pega id (aqui vale retornar porque vamos usar no save da mensagem IN)
-        long conversaId = conversaRepo.criarOuAtualizar(contatoId, ultimaMsgEm);
+        long conversaId = conversaRepo.criarOuAtualizar(contatoId, ultimaMsgEm, phoneNumberId);
 
         // 4) Atribui conversa ao operador
-        conversaRepo.atribuirOperadorSeNulo(conversaId);
+        conversaRepo.atribuirOperadorSeNulo(conversaId, phoneNumberId);
 
         // 4) salva mensagem IN (se tiver message)
         if (msg != null) {
