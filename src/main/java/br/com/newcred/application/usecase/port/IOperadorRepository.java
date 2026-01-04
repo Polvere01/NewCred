@@ -1,5 +1,6 @@
 package br.com.newcred.application.usecase.port;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IOperadorRepository {
@@ -10,6 +11,8 @@ public interface IOperadorRepository {
     Optional<OperadorResumo> buscarPorId(Long id);
 
     Optional<OperadorAuth> buscarPorEmail(String email);
+
+    void inserirVinculos(long operadorId, List<String> phoneNumberIds);
 
     record OperadorResumo(Long id, String nome, String email, String role, Boolean ativo, Long supervisorId) {}
 

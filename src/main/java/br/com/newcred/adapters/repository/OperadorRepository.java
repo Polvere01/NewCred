@@ -4,6 +4,8 @@ import br.com.newcred.application.usecase.port.IOperadorRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -73,5 +75,31 @@ public class OperadorRepository implements IOperadorRepository {
                     rs.getBoolean("ativo")
             ));
         }, email);
+    }
+
+    @Override
+    public void inserirVinculos(long operadorId, List<String> phoneNumberIds) {
+        if (phoneNumberIds == null || phoneNumberIds.isEmpty()) return;
+
+        // limpa duplicados/blank
+        var ids = phoneNumberIds.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .toList();
+
+        if (ids.isEmpty()) return;
+
+        // bulk insert
+        jdbc.batchUpdate(
+                "insert into operador_phone_numbers (operador_id, phone_number_id) values (?, ?) on conflict do nothing",
+                ids,
+                ids.size(),
+                (ps, phoneId) -> {
+                    ps.setLong(1, operadorId);
+                    ps.setString(2, phoneId);
+                }
+        );
     }
 }

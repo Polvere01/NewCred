@@ -6,6 +6,7 @@ import br.com.newcred.application.usecase.port.ICriarOperador;
 import br.com.newcred.application.usecase.port.IOperadorRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -18,6 +19,7 @@ public class CriarOperador implements ICriarOperador {
         this.operadorRepository = operadorRepository;
     }
 
+    @Transactional
     @Override
     public CriarOperadorResponseDto executar(CriarOperadorRequestDto dto) {
 
@@ -66,7 +68,25 @@ public class CriarOperador implements ICriarOperador {
 
         String hash = encoder.encode(dto.senha());
 
+        if (role.equals("OPERADOR")) {
+            if (dto.phoneNumberIds() == null || dto.phoneNumberIds().isEmpty()) {
+                throw new IllegalArgumentException("phoneNumberIds é obrigatório para OPERADOR");
+            }
+            if (dto.phoneNumberIds().size() > 2) {
+                throw new IllegalArgumentException("OPERADOR pode ter no máximo 2 phoneNumberIds");
+            }
+        }
+
         Long id = operadorRepository.inserir(dto.nome().trim(), email, hash, role, supervisorId);
+
+        if ("OPERADOR".equals(role)) {
+            if (dto.phoneNumberIds().isEmpty()) {
+                throw new IllegalArgumentException("phoneNumberIds é obrigatório para OPERADOR");
+            }
+            operadorRepository.inserirVinculos(id, dto.phoneNumberIds());
+        }
+
+
 
         var op = operadorRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalStateException("operador não encontrado após inserir"));
