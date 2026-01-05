@@ -48,19 +48,31 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
             var sheet = wb.getSheetAt(0);
             var formatter = new DataFormatter();
 
-            // acha colunas pelo header (linha 0)
+            // headers
             var header = sheet.getRow(0);
+            if (header == null) throw new IllegalArgumentException("Planilha sem header (linha 1)");
+
             int colTelefone = -1;
             int colNome = -1;
+            int colCpf = -1;
+            int colValorContrato = -1;
 
             for (Cell c : header) {
-                String h = formatter.formatCellValue(c).trim().toUpperCase();
-                if (h.equals("TELEFONE1")) colTelefone = c.getColumnIndex();
-                if (h.equals("NOME")) colNome = c.getColumnIndex();
+                String h = formatter.formatCellValue(c).trim().toLowerCase();
+
+                // aceita variações pra reaproveitar em outras planilhas
+                if (h.equals("telefone") || h.equals("telefone1")) colTelefone = c.getColumnIndex();
+                if (h.equals("nome")) colNome = c.getColumnIndex();
+                if (h.equals("cpf")) colCpf = c.getColumnIndex();
+                if (h.equals("valorcontrato") || h.equals("valor_contrato") || h.equals("valor contrato"))
+                    colValorContrato = c.getColumnIndex();
             }
 
             if (colTelefone < 0 || colNome < 0) {
-                throw new IllegalArgumentException("Cabeçalho precisa ter TELEFONE1 e NOME");
+                throw new IllegalArgumentException("Cabeçalho precisa ter: telefone e nome");
+            }
+            if (colCpf < 0 || colValorContrato < 0) {
+                throw new IllegalArgumentException("Cabeçalho precisa ter: cpf e valorContrato");
             }
 
             for (int r = 1; r <= sheet.getLastRowNum(); r++) {
@@ -69,6 +81,8 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
 
                 String telRaw = formatter.formatCellValue(row.getCell(colTelefone)).trim();
                 String nomeRaw = formatter.formatCellValue(row.getCell(colNome)).trim();
+                String cpfRaw = formatter.formatCellValue(row.getCell(colCpf)).trim();
+                String valorContratoRaw = formatter.formatCellValue(row.getCell(colValorContrato)).trim();
 
                 if (telRaw.isBlank() || nomeRaw.isBlank()) continue;
 
@@ -77,18 +91,31 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
                 String telefone = normalizarTelefoneBR(telRaw);
                 String primeiroNome = primeiroNome(nomeRaw);
 
+                // cpf só dígitos (sem ponto/traço)
+                String cpf = cpfRaw.replaceAll("\\D", "");
+                // valorContrato: deixa como vem (ex: "4.153,69") ou normaliza depois
+                String valorContrato = valorContratoRaw;
+
                 if (telefone == null) {
                     erros.add(new FalhaDto(telRaw, nomeRaw, "Telefone inválido"));
                     continue;
                 }
+                if (cpf.isBlank()) {
+                    erros.add(new FalhaDto(telefone, nomeRaw, "CPF vazio/inválido"));
+                    continue;
+                }
+                if (valorContrato.isBlank()) {
+                    erros.add(new FalhaDto(telefone, nomeRaw, "valorContrato vazio"));
+                    continue;
+                }
 
                 try {
-                    //melhorar o phonenumberid
-                    waClient.enviarTemplate(template, telefone, primeiroNome, "956785587513587");
+                    // ✅ SEM HARDCODE: usa o phoneNumberId recebido
+                    // ✅ aqui assume que teu client vai aceitar cpf e valorContrato
+                    waClient.enviarTemplate(template, telefone, primeiroNome, cpf, valorContrato, phoneNumberId);
                     enviados++;
 
-                    // 👉 opcional: “freio” simples pra não estourar limite
-                    Thread.sleep(500); // ajuste depois
+                    Thread.sleep(200); // ajusta depois
                 } catch (Exception ex) {
                     erros.add(new FalhaDto(telefone, nomeRaw, ex.getMessage()));
                 }
@@ -97,7 +124,7 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
             return new DisparoResultadoDto(total, enviados, erros.size(), erros);
 
         } catch (Exception e) {
-            throw new RuntimeException("Falha no disparo", e);
+            throw new RuntimeException("Falha no disparo (XLSX)", e);
         }
     }
 
@@ -110,7 +137,7 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
 
             var csv = CSVFormat.DEFAULT.builder()
                     .setDelimiter(';')
-                    .setHeader()                  // pega header automaticamente da primeira linha
+                    .setHeader()                  
                     .setSkipHeaderRecord(true)
                     .setIgnoreHeaderCase(true)
                     .setTrim(true)
