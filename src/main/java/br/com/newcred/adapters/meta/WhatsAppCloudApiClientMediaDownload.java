@@ -13,22 +13,19 @@ public class WhatsAppCloudApiClientMediaDownload implements IMetaMediaGateway {
 
     private final RestClient rest;
     private final String baseUrl;
-    private final String phoneNumberId;
 
     public WhatsAppCloudApiClientMediaDownload(
             RestClient.Builder builder,
             @Value("${meta.base-url:https://graph.facebook.com}") String baseUrl,
             @Value("${meta.version}") String version,
-            @Value("${meta.phone-number-id}") String phoneNumberId,
             @Value("${meta.token}") String token
     ) {
         this.baseUrl = baseUrl + "/" + version;
-        this.phoneNumberId = phoneNumberId;
         this.rest = builder.defaultHeader("Authorization", "Bearer " + token).build();
     }
 
     @Override
-    public MetaMediaInfo obterMediaInfo(String mediaId) {
+    public MetaMediaInfo obterMediaInfo(String mediaId, String phoneNumberId) {
         String url = baseUrl + "/" + mediaId + "?phone_number_id=" + phoneNumberId;
 
         RetrieveMediaResponseDto resp = rest.get()

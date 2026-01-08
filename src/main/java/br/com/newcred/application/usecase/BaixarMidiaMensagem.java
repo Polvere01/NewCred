@@ -29,8 +29,10 @@ public class BaixarMidiaMensagem implements IBaixarMidiaMensagem {
         if (info.mediaId() == null || info.mediaId().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mensagem não possui media_id");
         }
+        if (info.phoneNumberId() == null || info.phoneNumberId().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mensagem sem phone_number_id");
 
-        var mediaInfo = meta.obterMediaInfo(info.mediaId());
+        var mediaInfo = meta.obterMediaInfo(info.mediaId(), info.phoneNumberId());
         InputStream stream = meta.baixarMediaStream(mediaInfo.url());
 
         String mime = (mediaInfo.mimeType() != null && !mediaInfo.mimeType().isBlank())

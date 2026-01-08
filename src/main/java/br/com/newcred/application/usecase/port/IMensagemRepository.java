@@ -15,7 +15,8 @@ public interface IMensagemRepository {
             String whatsappIdOrigem,
             String texto,
             long timestampWhatsapp,
-            OffsetDateTime enviadoEm
+            OffsetDateTime enviadoEm,
+            String phoneNumberId
     );
 
 
@@ -27,7 +28,8 @@ public interface IMensagemRepository {
             String mediaId,
             long timestampWhatsapp,
             OffsetDateTime enviadoEm,
-            String filename
+            String filename,
+            String phoneNumberId
     );
 
     void salvarSaida(Long conversaID, String phoneNumberIdDestino, String idDestino, String texto);

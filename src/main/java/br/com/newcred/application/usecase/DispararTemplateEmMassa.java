@@ -137,7 +137,7 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
 
             var csv = CSVFormat.DEFAULT.builder()
                     .setDelimiter(';')
-                    .setHeader()                  
+                    .setHeader()
                     .setSkipHeaderRecord(true)
                     .setIgnoreHeaderCase(true)
                     .setTrim(true)
@@ -171,6 +171,7 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
                 }
 
                 try {
+                    System.out.println(" Disparando para " + telefone + " (" + primeiroNome + ")");
                     waClient.enviarTemplate(template, telefone, primeiroNome, phoneNumberId);
                     enviados++;
                     Thread.sleep(120);

@@ -90,11 +90,11 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
 
         // 4) salva mensagem IN (se tiver message)
         if (msg != null) {
-            salvarMensagemEntrada(conversaId, msg, ultimaMsgEm);
+            salvarMensagemEntrada(conversaId, msg, ultimaMsgEm, phoneNumberId);
         }
     }
 
-    private void salvarMensagemEntrada(long conversaId, MessageDTO msg, OffsetDateTime enviadoEm) {
+    private void salvarMensagemEntrada(long conversaId, MessageDTO msg, OffsetDateTime enviadoEm, String phoneNumberId) {
         String wamid = msg.id();
         if (wamid == null || wamid.isBlank()) return;
 
@@ -107,7 +107,7 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
         }
         //TODO criar um estrategy
         if (TEXTO.equals(msg.type())) {
-            mensagemRepo.salvarEntrada(conversaId, wamid, from, texto, ts, enviadoEm);
+            mensagemRepo.salvarEntrada(conversaId, wamid, from, texto, ts, enviadoEm, phoneNumberId   );
         }
 
         if (AUDIO.equals(msg.type())) {
@@ -119,7 +119,8 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
                     msg.audio().id(),
                     ts,
                     enviadoEm,
-                    null
+                    null,
+                    phoneNumberId
             );
         }
 
@@ -133,7 +134,8 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
                     mediaId,
                     Long.parseLong(msg.timestamp()),
                     parseEpoch(msg.timestamp()),
-                    null
+                    null,
+                    phoneNumberId
             );
         }
         if (DOCUMENT.equals(msg.type())) {
@@ -146,7 +148,8 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
                     mediaId,
                     Long.parseLong(msg.timestamp()),
                     parseEpoch(msg.timestamp()),
-                    msg.document().filename()
+                    msg.document().filename(),
+                    phoneNumberId
             );
         }
 
@@ -160,7 +163,8 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
                     mediaId,
                     Long.parseLong(msg.timestamp()),
                     parseEpoch(msg.timestamp()),
-                    null
+                    null,
+                    phoneNumberId
             );
         }
 

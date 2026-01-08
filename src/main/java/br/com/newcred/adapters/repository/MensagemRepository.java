@@ -22,15 +22,15 @@ public class MensagemRepository implements IMensagemRepository {
 
     @Override
     public void salvarEntrada(long conversaId, String wamid, String whatsappIdOrigem,
-                              String texto, long timestampWhatsapp, OffsetDateTime enviadoEm) {
+                              String texto, long timestampWhatsapp, OffsetDateTime enviadoEm, String phoneNumberId) {
 
         String sql = """
                     insert into mensagens (
                         conversa_id, whatsapp_message_id, direcao,
                         whatsapp_id_origem, phone_number_id_destino,
-                        tipo, texto, timestamp_whatsapp, enviado_em
+                        tipo, texto, timestamp_whatsapp, enviado_em, phone_number_id
                     )
-                    values (?, ?, 'IN', ?, null, 'text', ?, ?, ?)
+                    values (?, ?, 'IN', ?, null, 'text', ?, ?, ?, ?)
                     on conflict (whatsapp_message_id)
                     do nothing
                 """;
@@ -41,7 +41,8 @@ public class MensagemRepository implements IMensagemRepository {
                 whatsappIdOrigem,
                 texto,
                 timestampWhatsapp,
-                enviadoEm
+                enviadoEm,
+                phoneNumberId
         );
     }
 
@@ -54,7 +55,8 @@ public class MensagemRepository implements IMensagemRepository {
             String mediaId,
             long timestampWhatsapp,
             OffsetDateTime enviadoEm,
-            String filename
+            String filename,
+            String phoneNumberId
     ) {
         String sql = """
                     insert into mensagens (
@@ -66,9 +68,10 @@ public class MensagemRepository implements IMensagemRepository {
                         media_id,
                         nome_arquivo,
                         timestamp_whatsapp,
-                        enviado_em
+                        enviado_em,
+                        phone_number_id
                     )
-                    values (?, ?, 'IN', ?, ?, ?, ?, ?, ?)
+                    values (?, ?, 'IN', ?, ?, ?, ?, ?, ?, ?)
                     on conflict (whatsapp_message_id)
                     do nothing
                 """;
@@ -82,7 +85,8 @@ public class MensagemRepository implements IMensagemRepository {
                 mediaId,
                 filename,
                 timestampWhatsapp,
-                enviadoEm
+                enviadoEm,
+                phoneNumberId
         );
     }
 
@@ -152,17 +156,18 @@ public class MensagemRepository implements IMensagemRepository {
     @Override
     public Optional<MensagemMediaInfoDto> buscarMediaInfo(long mensagemId) {
         String sql = """
-                    select media_id, tipo
-                    from mensagens
-                    where id = ?
+                   select media_id, tipo, phone_number_id
+                   from mensagens
+                   where id = ?
                 """;
 
         return jdbc.query(sql, rs -> {
             if (!rs.next()) return Optional.empty();
             return Optional.of(new MensagemMediaInfoDto(
                     rs.getString("media_id"),
-                    rs.getString("tipo")
-            ));
+                    rs.getString("tipo"),
+                    rs.getString("phone_number_id"
+            )));
         }, mensagemId);
     }
 
