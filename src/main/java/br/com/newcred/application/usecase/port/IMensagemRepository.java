@@ -38,4 +38,7 @@ public interface IMensagemRepository {
     List<MensagemDTO> listarPorConversa(long conversaId);
 
     Optional<MensagemMediaInfoDto> buscarMediaInfo(long mensagemId);
+
+    void atualizarStatusPorWamid(String wamid, String status, long statusTs, OffsetDateTime statusEm);
+
 }

@@ -59,6 +59,11 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
     }
 
     private void processarValue(ValueDTO value) {
+
+        if (value.statuses() != null && !value.statuses().isEmpty()) {
+            value.statuses().forEach(this::processarStatus);
+            return;
+        }
         var contact = primeiroContato(value);
         if (contact == null) return;
 
@@ -159,6 +164,27 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
             );
         }
 
+    }
+
+    private void processarStatus(StatusDTO st) {
+        if (st == null) return;
+
+        String wamid = st.id();
+        if (wamid == null || wamid.isBlank()) return;
+
+        String status = st.status();
+        if (status == null || status.isBlank()) return;
+
+        long ts = 0L;
+        if (st.timestamp() != null && !st.timestamp().isBlank()) {
+            ts = Long.parseLong(st.timestamp());
+        }
+
+        OffsetDateTime em = (ts > 0)
+                ? OffsetDateTime.ofInstant(Instant.ofEpochSecond(ts), ZoneOffset.UTC)
+                : OffsetDateTime.now(ZoneOffset.UTC);
+
+        mensagemRepo.atualizarStatusPorWamid(wamid, status, ts, em);
     }
 
     private static ContactDTO primeiroContato(ValueDTO value) {

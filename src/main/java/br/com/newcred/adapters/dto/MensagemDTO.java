@@ -7,5 +7,6 @@ public record MensagemDTO(
         String texto,
         String tipo,
         String direcao,
-        OffsetDateTime createdAt
+        OffsetDateTime createdAt,
+        String status
 ) {}

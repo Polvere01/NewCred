@@ -25,15 +25,15 @@ public class MensagemRepository implements IMensagemRepository {
                               String texto, long timestampWhatsapp, OffsetDateTime enviadoEm) {
 
         String sql = """
-            insert into mensagens (
-                conversa_id, whatsapp_message_id, direcao,
-                whatsapp_id_origem, phone_number_id_destino,
-                tipo, texto, timestamp_whatsapp, enviado_em
-            )
-            values (?, ?, 'IN', ?, null, 'text', ?, ?, ?)
-            on conflict (whatsapp_message_id)
-            do nothing
-        """;
+                    insert into mensagens (
+                        conversa_id, whatsapp_message_id, direcao,
+                        whatsapp_id_origem, phone_number_id_destino,
+                        tipo, texto, timestamp_whatsapp, enviado_em
+                    )
+                    values (?, ?, 'IN', ?, null, 'text', ?, ?, ?)
+                    on conflict (whatsapp_message_id)
+                    do nothing
+                """;
 
         jdbc.update(sql,
                 conversaId,
@@ -57,21 +57,21 @@ public class MensagemRepository implements IMensagemRepository {
             String filename
     ) {
         String sql = """
-        insert into mensagens (
-            conversa_id,
-            whatsapp_message_id,
-            direcao,
-            whatsapp_id_origem,
-            tipo,
-            media_id,
-            nome_arquivo,
-            timestamp_whatsapp,
-            enviado_em
-        )
-        values (?, ?, 'IN', ?, ?, ?, ?, ?, ?)
-        on conflict (whatsapp_message_id)
-        do nothing
-    """;
+                    insert into mensagens (
+                        conversa_id,
+                        whatsapp_message_id,
+                        direcao,
+                        whatsapp_id_origem,
+                        tipo,
+                        media_id,
+                        nome_arquivo,
+                        timestamp_whatsapp,
+                        enviado_em
+                    )
+                    values (?, ?, 'IN', ?, ?, ?, ?, ?, ?)
+                    on conflict (whatsapp_message_id)
+                    do nothing
+                """;
 
         jdbc.update(
                 sql,
@@ -95,20 +95,21 @@ public class MensagemRepository implements IMensagemRepository {
     ) {
 
         String sql = """
-            insert into mensagens (
-                conversa_id,
-                whatsapp_message_id,
-                direcao,
-                whatsapp_id_origem,
-                phone_number_id_destino,
-                tipo,
-                texto,
-                enviado_em
-            )
-            values (?, ?, 'OUT', null, ?, 'text', ?, now())
-            on conflict (whatsapp_message_id)
-            do nothing
-        """;
+                    insert into mensagens (
+                        conversa_id,
+                        whatsapp_message_id,
+                        direcao,
+                        whatsapp_id_origem,
+                        phone_number_id_destino,
+                        tipo,
+                        texto,
+                        enviado_em,
+                        status
+                    )
+                    values (?, ?, 'OUT', null, ?, 'text', ?, now(), 'sent')
+                    on conflict (whatsapp_message_id)
+                    do nothing
+                """;
 
         jdbc.update(
                 sql,
@@ -121,11 +122,17 @@ public class MensagemRepository implements IMensagemRepository {
 
     public List<MensagemDTO> listarPorConversa(long conversaId) {
         String sql = """
-            select id, texto, tipo, direcao, enviado_em
-            from mensagens
-            where conversa_id = ?
-            order by enviado_em asc, id asc
-        """;
+                    select
+                        id,
+                        texto,
+                        tipo,
+                        direcao,
+                        enviado_em,
+                        status
+                    from mensagens
+                    where conversa_id = ?
+                    order by enviado_em asc, id asc
+                """;
 
         return jdbc.query(sql, (rs, i) -> {
             String dirDb = rs.getString("direcao"); // IN / OUT
@@ -136,7 +143,8 @@ public class MensagemRepository implements IMensagemRepository {
                     rs.getString("texto"),
                     rs.getString("tipo"),
                     dirApi,
-                    rs.getObject("enviado_em", OffsetDateTime.class)
+                    rs.getObject("enviado_em", OffsetDateTime.class),
+                    rs.getString("status")
             );
         }, conversaId);
     }
@@ -144,10 +152,10 @@ public class MensagemRepository implements IMensagemRepository {
     @Override
     public Optional<MensagemMediaInfoDto> buscarMediaInfo(long mensagemId) {
         String sql = """
-            select media_id, tipo
-            from mensagens
-            where id = ?
-        """;
+                    select media_id, tipo
+                    from mensagens
+                    where id = ?
+                """;
 
         return jdbc.query(sql, rs -> {
             if (!rs.next()) return Optional.empty();
@@ -159,21 +167,59 @@ public class MensagemRepository implements IMensagemRepository {
     }
 
     @Override
+    public void atualizarStatusPorWamid(String wamid, String status, long statusTs, OffsetDateTime statusEm) {
+        // evita regredir status (read > delivered > sent)
+        String sql = """
+                    update mensagens
+                    set
+                      status = case
+                        when status = 'read' then status
+                        when ? = 'read' then 'read'
+                        when status = 'delivered' then status
+                        when ? = 'delivered' then 'delivered'
+                        when status is null then ?
+                        else status
+                      end,
+                      status_ts = greatest(coalesce(status_ts, 0), ?),
+                      delivered_em = case when ? = 'delivered' then coalesce(delivered_em, ?) else delivered_em end,
+                      read_em      = case when ? = 'read'      then coalesce(read_em, ?)      else read_em end
+                    where whatsapp_message_id = ?
+                      and direcao = 'OUT'
+                """;
+
+        jdbc.update(sql,
+                status, status,
+                status,
+                statusTs,
+                status, statusEm,
+                status, statusEm,
+                wamid
+        );
+
+    }
+
+    @Override
     public Long salvarSaidaMedia(long conversaId, String wamid, String phoneNumberIdDestino,
                                  String tipo, String mediaId, OffsetDateTime enviadoEm, String filename) {
 
         String sql = """
-            insert into mensagens (
-                conversa_id, whatsapp_message_id, direcao,
-                whatsapp_id_origem, phone_number_id_destino,
-                tipo, media_id, nome_arquivo,
-                enviado_em
-            )
-            values (?, ?, 'OUT', null, ?, ?, ?, ?, ?)
-            on conflict (whatsapp_message_id)
-            do nothing
-            returning id
-        """;
+                    insert into mensagens (
+                        conversa_id,
+                        whatsapp_message_id,
+                        direcao,
+                        whatsapp_id_origem,
+                        phone_number_id_destino,
+                        tipo,
+                        media_id,
+                        nome_arquivo,
+                        enviado_em,
+                        status
+                    )
+                    values (?, ?, 'OUT', null, ?, ?, ?, ?, ?, 'sent')
+                    on conflict (whatsapp_message_id)
+                    do nothing
+                    returning id
+                """;
 
         return jdbc.query(sql, rs -> {
                     if (rs.next()) return rs.getLong("id");
