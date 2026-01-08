@@ -64,12 +64,14 @@ public class ConversaListaRepository {
                       coalesce(m.texto, '') as "ultimaMensagem",
                       coalesce(o.nome, '') as "operadorNome",
                       coalesce(m.direcao, '') as "ultimaDirecao",
-                      coalesce(m.tipo, '') as "ultimaTipo"
+                      coalesce(m.tipo, '') as "ultimaTipo",
+                      coalesce(m.phone_number_id, '') as "phoneNumberId"
                     from conversas c
                     join contatos ct on ct.id = c.contato_id
                     left join operadores o on o.id = c.operador_id
                     left join lateral (
-                      select texto, enviado_em, direcao, tipo
+                      select texto, enviado_em, direcao, tipo,
+                      coalesce(phone_number_id_destino, phone_number_id) as phone_number_id
                       from mensagens
                       where conversa_id = c.id
                       order by enviado_em desc, id desc
@@ -87,7 +89,7 @@ public class ConversaListaRepository {
                                 null,
                                 dirApi(rs.getString("ultimaDirecao")),
                                 rs.getString("ultimaTipo"),
-                                null
+                                rs.getString("phoneNumberId")
                         ),
                 operadorId
         );
@@ -101,12 +103,14 @@ public class ConversaListaRepository {
                       coalesce(m.texto, '') as "ultimaMensagem",
                       coalesce(o.nome, '') as "operadorNome",
                       coalesce(m.direcao, '') as "ultimaDirecao",
-                      coalesce(m.tipo, '') as "ultimaTipo"
+                      coalesce(m.tipo, '') as "ultimaTipo",
+                      coalesce(m.phone_number_id, '') as "phoneNumberId"
                     from conversas c
                     join contatos ct on ct.id = c.contato_id
                     join operadores o on o.id = c.operador_id
                     left join lateral (
-                      select texto, enviado_em, direcao, tipo
+                      select texto, enviado_em, direcao, tipo,
+                      coalesce(phone_number_id_destino, phone_number_id) as phone_number_id
                       from mensagens
                       where conversa_id = c.id
                       order by enviado_em desc, id desc
@@ -125,7 +129,7 @@ public class ConversaListaRepository {
                                 rs.getString("operadorNome"),
                                 dirApi(rs.getString("ultimaDirecao")),
                                 rs.getString("ultimaTipo"),
-                                null
+                                rs.getString("phoneNumberId")
                         ),
                 supervisorId, supervisorId
         );
