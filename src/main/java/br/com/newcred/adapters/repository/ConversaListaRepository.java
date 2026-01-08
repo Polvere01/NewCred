@@ -34,7 +34,7 @@ public class ConversaListaRepository {
                     enviado_em,
                     direcao,
                     tipo,
-                    coalesce(phone_number_id_destino, phone_number_id) as phone_number_id
+                    phone_number_id
                   from mensagens
                   where conversa_id = c.id
                   order by enviado_em desc, id desc
@@ -71,7 +71,7 @@ public class ConversaListaRepository {
                     left join operadores o on o.id = c.operador_id
                     left join lateral (
                       select texto, enviado_em, direcao, tipo,
-                      coalesce(phone_number_id_destino, phone_number_id) as phone_number_id
+                      phone_number_id
                       from mensagens
                       where conversa_id = c.id
                       order by enviado_em desc, id desc
@@ -110,7 +110,7 @@ public class ConversaListaRepository {
                     join operadores o on o.id = c.operador_id
                     left join lateral (
                       select texto, enviado_em, direcao, tipo,
-                      coalesce(phone_number_id_destino, phone_number_id) as phone_number_id
+                      phone_number_id
                       from mensagens
                       where conversa_id = c.id
                       order by enviado_em desc, id desc
