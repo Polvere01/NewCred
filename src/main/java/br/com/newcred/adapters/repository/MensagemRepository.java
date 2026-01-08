@@ -94,7 +94,7 @@ public class MensagemRepository implements IMensagemRepository {
             String texto
     ) {
 
-        String sql = """
+            String sql = """
                     insert into mensagens (
                         conversa_id,
                         whatsapp_message_id,

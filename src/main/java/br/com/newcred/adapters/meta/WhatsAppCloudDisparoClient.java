@@ -84,15 +84,7 @@ public class WhatsAppCloudDisparoClient implements IWhatsAppCloudClient {
                 "type", "template",
                 "template", Map.of(
                         "name", templateName,
-                        "language", Map.of("code", "pt_BR"),
-                        "components", List.of(
-                                Map.of(
-                                        "type", "body",
-                                        "parameters", List.of(
-                                                Map.of("type", "text", "text", firstName)
-                                        )
-                                )
-                        )
+                        "language", Map.of("code", "pt_BR")
                 )
         );
 
