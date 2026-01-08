@@ -32,10 +32,10 @@ public interface IMensagemRepository {
             String phoneNumberId
     );
 
-    void salvarSaida(Long conversaID, String phoneNumberIdDestino, String idDestino, String texto);
+    void salvarSaida(Long conversaID, String phoneNumberIdDestino, String idDestino, String texto, String phoneNumberId);
 
     Long salvarSaidaMedia(long conversaId, String wamid, String phoneNumberIdDestino,
-                          String tipo, String mediaId, OffsetDateTime enviadoEm, String filename);
+                          String tipo, String mediaId, OffsetDateTime enviadoEm, String filename, String phoneNumberId);
 
     List<MensagemDTO> listarPorConversa(long conversaId);
 

@@ -5,6 +5,7 @@ public record ConversaListaDTO(long id,
                                String ultimaMensagem,
                                String operadorNome,
                                String ultimaDirecao,
-                               String ultimaTipo
+                               String ultimaTipo,
+                               String phoneNumberId
 ) {
 }

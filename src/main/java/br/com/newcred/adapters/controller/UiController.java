@@ -62,7 +62,7 @@ public class UiController {
 
     @PostMapping("/mensagens/enviar")
     public MensagensResponseDto enviar(@RequestBody MensagensRequestDto req) {
-        return enviarMensagemUseCase.enviar(req);
+        return enviarMensagemUseCase.enviar(req, req.phoneNumberId());
     }
 
 
@@ -81,9 +81,10 @@ public class UiController {
     public Map<String, Object> enviarAudio(
             @PathVariable long conversaId,
             @RequestParam("waIdDestino") String waIdDestino,
+            @RequestParam("phoneNumberId") String phoneNumberId,
             @RequestPart("audio") MultipartFile audio
     ) {
-        var resp = enviarAudio.executar(conversaId, waIdDestino, audio);
+        var resp = enviarAudio.executar(conversaId, waIdDestino, audio, phoneNumberId);
         return Map.of(
                 "wamid", resp.wamid(),
                 "mediaId", resp.mediaId(),
@@ -96,9 +97,10 @@ public class UiController {
     public Map<String, Object> enviarVideo(
             @PathVariable long conversaId,
             @RequestParam("waIdDestino") String waIdDestino,
+            @RequestParam("phoneNumberId") String phoneNumberId,
             @RequestPart("video") MultipartFile video
     ) {
-        var resp = enviarVideo.executar(conversaId, waIdDestino, video);
+        var resp = enviarVideo.executar(conversaId, waIdDestino, video, phoneNumberId);
         return Map.of(
                 "wamid", resp.wamid(),
                 "mediaId", resp.mediaId(),
@@ -110,10 +112,11 @@ public class UiController {
     public Map<String, Object> enviarImagem(
             @PathVariable long conversaId,
             @RequestParam("waIdDestino") String waIdDestino,
+            @RequestParam("phoneNumberId") String phoneNumberId,
             @RequestPart("imagem") MultipartFile imagem,
             @RequestParam(value = "caption", required = false) String caption
     ) {
-        var resp = enviarImagem.executar(conversaId, waIdDestino, imagem, caption);
+        var resp = enviarImagem.executar(conversaId, waIdDestino, imagem, caption, phoneNumberId);
         return Map.of(
                 "wamid", resp.wamid(),
                 "mediaId", resp.mediaId(),
@@ -125,10 +128,11 @@ public class UiController {
     public Map<String, Object> enviarPdf(
             @PathVariable long conversaId,
             @RequestParam("waIdDestino") String waIdDestino,
+            @RequestParam("phoneNumberId") String phoneNumberId,
             @RequestPart("pdf") MultipartFile pdf,
             @RequestParam(value = "caption", required = false) String caption
     ) {
-        var resp = enviarPdf.executar(conversaId, waIdDestino, pdf, caption);
+        var resp = enviarPdf.executar(conversaId, waIdDestino, pdf, caption, phoneNumberId);
         return Map.of(
                 "wamid", resp.wamid(),
                 "mediaId", resp.mediaId(),

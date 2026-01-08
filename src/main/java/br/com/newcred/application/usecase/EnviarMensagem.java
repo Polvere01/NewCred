@@ -19,11 +19,11 @@ public class EnviarMensagem implements IEnviarMensagem {
     }
 
     @Override
-    public MensagensResponseDto enviar(MensagensRequestDto dto) {
+    public MensagensResponseDto enviar(MensagensRequestDto dto, String phoneNumberId) {
 
-        String wamid = client.enviarTexto(dto.waIdDestino(), dto.texto());
+        String wamid = client.enviarTexto(phoneNumberId ,dto.waIdDestino(), dto.texto());
 
-        mensagemRepository.salvarSaida(dto.conversaId(), wamid, dto.waIdDestino(), dto.texto());
+        mensagemRepository.salvarSaida(dto.conversaId(), wamid, dto.waIdDestino(), dto.texto(), phoneNumberId);
 
         return new MensagensResponseDto(wamid);
     }

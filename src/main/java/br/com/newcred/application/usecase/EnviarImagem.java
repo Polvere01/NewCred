@@ -25,7 +25,7 @@ public class EnviarImagem implements IEnviarImagem {
 
     @Override
     @Transactional
-    public EnviarImagemResponseDto executar(long conversaId, String waIdDestino, MultipartFile imagem, String caption) {
+    public EnviarImagemResponseDto executar(long conversaId, String waIdDestino, MultipartFile imagem, String caption, String phoneNumberId) {
         if (imagem == null || imagem.isEmpty()) throw new IllegalArgumentException("Imagem vazia");
         if (waIdDestino == null || waIdDestino.isBlank()) throw new IllegalArgumentException("waIdDestino obrigatório");
 
@@ -40,10 +40,10 @@ public class EnviarImagem implements IEnviarImagem {
             if (filename == null || filename.isBlank()) filename = "image";
 
             // 1) upload
-            var mediaId = metaClient.uploadMedia(bytes, mimeType, filename);
+            var mediaId = metaClient.uploadMedia(phoneNumberId ,bytes, mimeType, filename);
 
             // 2) envia imagem
-            var wamid = metaClient.enviarImagemPorMediaId(waIdDestino, mediaId, caption);
+            var wamid = metaClient.enviarImagemPorMediaId(phoneNumberId, waIdDestino, mediaId, caption);
 
             // 3) salva
             var messagemId = mensagemRepo.salvarSaidaMedia(
@@ -53,7 +53,8 @@ public class EnviarImagem implements IEnviarImagem {
                     "image",
                     mediaId,
                     OffsetDateTime.now(ZoneOffset.UTC),
-                    filename
+                    filename,
+                    phoneNumberId
             );
 
             return new EnviarImagemResponseDto(wamid, mediaId, String.valueOf(messagemId));

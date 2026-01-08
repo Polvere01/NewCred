@@ -15,7 +15,6 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
     //TODO QUEBRAR EM CLASSES MENORES
     private final RestClient rest;
     private final String baseUrl;
-    private final String phoneNumberId;
     private final ObjectMapper mapper;
 
     public WhatsAppCloudApiClient(
@@ -23,20 +22,20 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
             ObjectMapper mapper,
             @Value("${meta.base-url:https://graph.facebook.com}") String baseUrl,
             @Value("${meta.version}") String version,
-            @Value("${meta.phone-number-id}") String phoneNumberId,
             @Value("${meta.token}") String token
     ) {
         this.mapper = mapper;
         this.baseUrl = baseUrl + "/" + version;
-        this.phoneNumberId = phoneNumberId;
 
         this.rest = builder
                 .defaultHeader("Authorization", "Bearer " + token)
                 .build();
     }
 
+
+
     @Override
-    public String enviarTexto(String to, String body) {
+    public String enviarTexto(String phoneNumberId, String to, String body) {
         var url = baseUrl + "/" + phoneNumberId + "/messages";
 
         var payload = new SendTextRequest(
@@ -75,12 +74,7 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
     ) {
     }
 
-    @Override
-    public String getPhoneNumberId() {
-        return phoneNumberId;
-    }
-
-    public String uploadMedia(byte[] bytes, String mimeType, String filename) {
+    public String uploadMedia(String phoneNumberId, byte[] bytes, String mimeType, String filename) {
         String url = baseUrl + "/" + phoneNumberId + "/media";
 
         var form = new org.springframework.util.LinkedMultiValueMap<String, Object>();
@@ -127,7 +121,7 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
     }
 
     @Override
-    public String enviarAudioPorMediaId(String to, String mediaId) {
+    public String enviarAudioPorMediaId(String phoneNumberId, String to, String mediaId) {
         String url = baseUrl + "/" + phoneNumberId + "/messages";
 
         var payload = new SendAudioRequest(
@@ -157,7 +151,7 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
     }
 
     @Override
-    public String enviarVideoPorMediaId(String to, String mediaId) {
+    public String enviarVideoPorMediaId(String phoneNumberId, String to, String mediaId) {
         String url = baseUrl + "/" + phoneNumberId + "/messages";
 
         var payload = new SendVideoRequest(
@@ -207,7 +201,7 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
     }
 
     @Override
-    public String enviarImagemPorMediaId(String to, String mediaId, String caption) {
+    public String enviarImagemPorMediaId(String phoneNumberId, String to, String mediaId, String caption) {
         String url = baseUrl + "/" + phoneNumberId + "/messages";
 
         var image = (caption == null || caption.isBlank())
@@ -249,7 +243,7 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
     ) {}
 
     @Override
-    public String enviarDocumentoPorMediaId(String to, String mediaId, String filename, String caption) {
+    public String enviarDocumentoPorMediaId(String phoneNumberId, String to, String mediaId, String filename, String caption) {
         String url = baseUrl + "/" + phoneNumberId + "/messages";
 
         var doc = new Document(mediaId, filename, (caption == null || caption.isBlank()) ? null : caption);
@@ -278,6 +272,11 @@ public class WhatsAppCloudApiClient implements IWhatsAppCloudApiClient {
         } catch (Exception e) {
             throw new RuntimeException("Erro lendo resposta do send document. Resposta=" + raw, e);
         }
+    }
+
+    @Override
+    public String getPhoneNumberId() {
+        return "";
     }
 
     public record SendDocumentRequest(

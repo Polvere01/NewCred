@@ -8,5 +8,6 @@ public record MensagemDTO(
         String tipo,
         String direcao,
         OffsetDateTime createdAt,
-        String status
+        String status,
+        String phoneNumberId
 ) {}

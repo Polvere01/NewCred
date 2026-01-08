@@ -29,7 +29,7 @@ public class EnviarAudio implements IEnviarAudio {
 
     @Override
     @Transactional
-    public EnviarAudioResponseDto executar(long conversaId, String waIdDestino, MultipartFile audio) {
+    public EnviarAudioResponseDto executar(long conversaId, String waIdDestino, MultipartFile audio, String phoneNumberId) {
         if (audio == null || audio.isEmpty()) throw new IllegalArgumentException("Áudio vazio");
         if (waIdDestino == null || waIdDestino.isBlank()) throw new IllegalArgumentException("waIdDestino obrigatório");
 
@@ -37,10 +37,10 @@ public class EnviarAudio implements IEnviarAudio {
         var conv = audioConverter.webmToOggOpus(audio);
 
         // 1) upload pra Meta -> mediaId
-        var mediaId = metaClient.uploadMedia(conv.bytes(), conv.mimeType(), conv.filename());
+        var mediaId = metaClient.uploadMedia(phoneNumberId, conv.bytes(), conv.mimeType(), conv.filename());
 
         // 2) envia msg de audio -> wamid
-        var wamid = metaClient.enviarAudioPorMediaId(waIdDestino, mediaId);
+        var wamid = metaClient.enviarAudioPorMediaId(phoneNumberId, waIdDestino, mediaId);
 
         // 3) salva no banco (OUT)
         var mensagemId = mensagemRepo.salvarSaidaMedia(
@@ -50,7 +50,8 @@ public class EnviarAudio implements IEnviarAudio {
                 "audio",
                 mediaId,
                 OffsetDateTime.now(ZoneOffset.UTC),
-                conv.filename() // ou audio.getOriginalFilename(), mas conv é mais seguro
+                conv.filename(),// ou audio.getOriginalFilename(), mas conv é mais seguro
+                phoneNumberId
         );
 
         return new EnviarAudioResponseDto(wamid, mediaId, String.valueOf(mensagemId));

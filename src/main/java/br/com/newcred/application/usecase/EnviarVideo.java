@@ -29,7 +29,7 @@ public class EnviarVideo implements IEnviarVideo {
 
     @Override
     @Transactional
-    public EnviarVideoResponseDto executar(long conversaId, String waIdDestino, MultipartFile video) {
+    public EnviarVideoResponseDto executar(long conversaId, String waIdDestino, MultipartFile video, String phoneNumberId) {
         if (video == null || video.isEmpty()) throw new IllegalArgumentException("Vídeo vazio");
         if (waIdDestino == null || waIdDestino.isBlank()) throw new IllegalArgumentException("waIdDestino obrigatório");
 
@@ -37,20 +37,21 @@ public class EnviarVideo implements IEnviarVideo {
         var conv = videoConverter.toMp4H264Aac(video);
 
         // 1) upload
-        var mediaId = metaClient.uploadMedia(conv.bytes(), conv.mimeType(), conv.filename());
+        var mediaId = metaClient.uploadMedia(phoneNumberId,conv.bytes(), conv.mimeType(), conv.filename());
 
         // 2) envia video
-        var wamid = metaClient.enviarVideoPorMediaId(waIdDestino, mediaId);
+        var wamid = metaClient.enviarVideoPorMediaId(phoneNumberId, waIdDestino, mediaId);
 
         // 3) salva
         var mensagemId = mensagemRepo.salvarSaidaMedia(
                 conversaId,
                 wamid,
-                metaClient.getPhoneNumberId(),
+                phoneNumberId,
                 "video",
                 mediaId,
                 OffsetDateTime.now(ZoneOffset.UTC),
-                conv.filename()
+                conv.filename(),
+                phoneNumberId
         );
 
         return new EnviarVideoResponseDto(wamid, mediaId, String.valueOf(mensagemId));

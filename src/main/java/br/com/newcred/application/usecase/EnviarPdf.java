@@ -24,7 +24,7 @@ public class EnviarPdf implements IEnviarPdf {
 
     @Override
     @Transactional
-    public EnviarPdfResponseDto executar(long conversaId, String waIdDestino, MultipartFile pdf, String caption) {
+    public EnviarPdfResponseDto executar(long conversaId, String waIdDestino, MultipartFile pdf, String caption, String phoneNumberId) {
         if (pdf == null || pdf.isEmpty()) throw new IllegalArgumentException("PDF vazio");
         if (waIdDestino == null || waIdDestino.isBlank()) throw new IllegalArgumentException("waIdDestino obrigatório");
 
@@ -43,20 +43,21 @@ public class EnviarPdf implements IEnviarPdf {
             if (!filename.toLowerCase().endsWith(".pdf")) filename = filename + ".pdf";
 
             // 1) upload
-            var mediaId = metaClient.uploadMedia(bytes, mimeType, filename);
+            var mediaId = metaClient.uploadMedia(phoneNumberId ,bytes, mimeType, filename);
 
             // 2) envia documento
-            var wamid = metaClient.enviarDocumentoPorMediaId(waIdDestino, mediaId, filename, caption);
+            var wamid = metaClient.enviarDocumentoPorMediaId(phoneNumberId ,waIdDestino, mediaId, filename, caption);
 
             // 3) salva
             var mensagemId = mensagemRepo.salvarSaidaMedia(
                     conversaId,
                     wamid,
-                    metaClient.getPhoneNumberId(),
+                    phoneNumberId,
                     "document",
                     mediaId,
                     OffsetDateTime.now(ZoneOffset.UTC),
-                    filename
+                    filename,
+                    phoneNumberId
             );
 
             return new EnviarPdfResponseDto(wamid, mediaId, String.valueOf(mensagemId));

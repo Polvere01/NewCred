@@ -5,5 +5,5 @@ import br.com.newcred.application.usecase.dto.MensagensResponseDto;
 
 public interface IEnviarMensagem {
 
-    MensagensResponseDto enviar(MensagensRequestDto dto);
+    MensagensResponseDto enviar(MensagensRequestDto dto, String phoneNumberId);
 }

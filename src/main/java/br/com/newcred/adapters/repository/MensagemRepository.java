@@ -95,7 +95,8 @@ public class MensagemRepository implements IMensagemRepository {
             Long conversaId,
             String wamid,
             String phoneNumberIdDestino,
-            String texto
+            String texto,
+            String phoneNumberId
     ) {
 
             String sql = """
@@ -108,9 +109,10 @@ public class MensagemRepository implements IMensagemRepository {
                         tipo,
                         texto,
                         enviado_em,
-                        status
+                        status,
+                        phone_number_id
                     )
-                    values (?, ?, 'OUT', null, ?, 'text', ?, now(), 'sent')
+                    values (?, ?, 'OUT', null, ?, 'text', ?, now(), 'sent', ?)
                     on conflict (whatsapp_message_id)
                     do nothing
                 """;
@@ -120,7 +122,8 @@ public class MensagemRepository implements IMensagemRepository {
                 conversaId,
                 wamid,
                 phoneNumberIdDestino,
-                texto
+                texto,
+                phoneNumberId
         );
     }
 
@@ -132,7 +135,8 @@ public class MensagemRepository implements IMensagemRepository {
                         tipo,
                         direcao,
                         enviado_em,
-                        status
+                        status,
+                        phone_number_id
                     from mensagens
                     where conversa_id = ?
                     order by enviado_em asc, id asc
@@ -148,7 +152,8 @@ public class MensagemRepository implements IMensagemRepository {
                     rs.getString("tipo"),
                     dirApi,
                     rs.getObject("enviado_em", OffsetDateTime.class),
-                    rs.getString("status")
+                    rs.getString("status"),
+                    rs.getString("phone_number_id")
             );
         }, conversaId);
     }
@@ -205,7 +210,7 @@ public class MensagemRepository implements IMensagemRepository {
 
     @Override
     public Long salvarSaidaMedia(long conversaId, String wamid, String phoneNumberIdDestino,
-                                 String tipo, String mediaId, OffsetDateTime enviadoEm, String filename) {
+                                 String tipo, String mediaId, OffsetDateTime enviadoEm, String filename, String phoneNumberId) {
 
         String sql = """
                     insert into mensagens (
@@ -218,9 +223,10 @@ public class MensagemRepository implements IMensagemRepository {
                         media_id,
                         nome_arquivo,
                         enviado_em,
-                        status
+                        status,
+                        phone_number_id
                     )
-                    values (?, ?, 'OUT', null, ?, ?, ?, ?, ?, 'sent')
+                    values (?, ?, 'OUT', null, ?, ?, ?, ?, ?, 'sent', ?)
                     on conflict (whatsapp_message_id)
                     do nothing
                     returning id
@@ -236,7 +242,8 @@ public class MensagemRepository implements IMensagemRepository {
                 tipo,
                 mediaId,
                 filename,
-                enviadoEm
+                enviadoEm,
+                phoneNumberId
         );
 
     }
