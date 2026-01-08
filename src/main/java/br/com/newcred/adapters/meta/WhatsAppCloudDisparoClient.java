@@ -53,7 +53,7 @@ public class WhatsAppCloudDisparoClient implements IWhatsAppCloudClient {
                                         "type", "body",
                                         "parameters", List.of(
                                                 Map.of("type", "text", "text", firstName),
-                                                Map.of("type", "text", "text", formatarCpf(cpf)),
+                                               // Map.of("type", "text", "text", formatarCpf(cpf)),
                                                 Map.of("type", "text", "text", valorContrato)
                                         )
                                 )
