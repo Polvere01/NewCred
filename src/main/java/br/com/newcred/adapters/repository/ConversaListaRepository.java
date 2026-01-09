@@ -24,7 +24,9 @@ public class ConversaListaRepository {
                   coalesce(o.nome, '') as "operadorNome",
                   coalesce(m.direcao, '') as "ultimaDirecao",
                   coalesce(m.tipo, '') as "ultimaTipo",
-                  coalesce(m.phone_number_id, '') as "phoneNumberId"
+                  coalesce(m.phone_number_id, '') as "phoneNumberId",
+                  c.tag_label as "tagLabel",
+                  c.tag_color as "tagColor"
                 from conversas c
                 join contatos ct on ct.id = c.contato_id
                 left join operadores o on o.id = c.operador_id
@@ -51,7 +53,9 @@ public class ConversaListaRepository {
                         rs.getString("operadorNome"),
                         dirApi(rs.getString("ultimaDirecao")),
                         rs.getString("ultimaTipo"),
-                        rs.getString("phoneNumberId")
+                        rs.getString("phoneNumberId"),
+                        rs.getString("tagLabel"),
+                        rs.getString("tagColor")
                 )
         );
     }
@@ -65,7 +69,9 @@ public class ConversaListaRepository {
                       coalesce(o.nome, '') as "operadorNome",
                       coalesce(m.direcao, '') as "ultimaDirecao",
                       coalesce(m.tipo, '') as "ultimaTipo",
-                      coalesce(m.phone_number_id, '') as "phoneNumberId"
+                      coalesce(m.phone_number_id, '') as "phoneNumberId",
+                      c.tag_label as "tagLabel",
+                      c.tag_color as "tagColor"
                     from conversas c
                     join contatos ct on ct.id = c.contato_id
                     left join operadores o on o.id = c.operador_id
@@ -89,7 +95,9 @@ public class ConversaListaRepository {
                                 null,
                                 dirApi(rs.getString("ultimaDirecao")),
                                 rs.getString("ultimaTipo"),
-                                rs.getString("phoneNumberId")
+                                rs.getString("phoneNumberId"),
+                                rs.getString("tagLabel"),
+                                rs.getString("tagColor")
                         ),
                 operadorId
         );
@@ -104,7 +112,9 @@ public class ConversaListaRepository {
                       coalesce(o.nome, '') as "operadorNome",
                       coalesce(m.direcao, '') as "ultimaDirecao",
                       coalesce(m.tipo, '') as "ultimaTipo",
-                      coalesce(m.phone_number_id, '') as "phoneNumberId"
+                      coalesce(m.phone_number_id, '') as "phoneNumberId",
+                      c.tag_label as "tagLabel",
+                      c.tag_color as "tagColor"
                     from conversas c
                     join contatos ct on ct.id = c.contato_id
                     join operadores o on o.id = c.operador_id
@@ -129,10 +139,21 @@ public class ConversaListaRepository {
                                 rs.getString("operadorNome"),
                                 dirApi(rs.getString("ultimaDirecao")),
                                 rs.getString("ultimaTipo"),
-                                rs.getString("phoneNumberId")
+                                rs.getString("phoneNumberId"),
+                                rs.getString("tagLabel"),
+                                rs.getString("tagColor")
                         ),
                 supervisorId, supervisorId
         );
+    }
+
+    public void atualizarTag(long conversaId, String label, String color) {
+        String sql = """
+                  update conversas
+                  set tag_label = ?, tag_color = ?, atualizado_em = now()
+                  where id = ?
+                """;
+        jdbc.update(sql, label, color, conversaId);
     }
 
     private static String dirApi(String dirDb) {

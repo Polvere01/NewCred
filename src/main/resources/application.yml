@@ -26,7 +26,6 @@ spring:
 meta:
   base-url: https://graph.facebook.com
   version: v22.0
-  phone-number-id: ${META_PHONE_NUMBER_ID}
   token: ${META_TOKEN}
 
 app:

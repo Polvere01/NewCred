@@ -1,6 +1,7 @@
 package br.com.newcred.adapters.controller;
 
 import br.com.newcred.adapters.config.security.OperadorContext;
+import br.com.newcred.adapters.dto.AtualizarTagRequest;
 import br.com.newcred.adapters.dto.ConversaListaDTO;
 import br.com.newcred.adapters.dto.MensagemDTO;
 import br.com.newcred.adapters.repository.ConversaListaRepository;
@@ -8,6 +9,7 @@ import br.com.newcred.application.usecase.dto.MensagensRequestDto;
 import br.com.newcred.application.usecase.dto.MensagensResponseDto;
 import br.com.newcred.application.usecase.port.*;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +56,14 @@ public class UiController {
             default -> repo.listarPorOperador(userId);
         };
     }
+
+    @PatchMapping("/{id}/tag")
+    public ResponseEntity<Void> atualizarTag(@PathVariable long id, @RequestBody AtualizarTagRequest req) {
+        repo.atualizarTag(id, req.label(), req.color());
+        return ResponseEntity.noContent().build();
+    }
+
+
 
     @GetMapping("/{id}/mensagens")
     public List<MensagemDTO> listar(@PathVariable("id") long conversaId) {
