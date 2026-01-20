@@ -26,7 +26,7 @@ public class WhatsAppCloudApiClientMediaDownload implements IMetaMediaGateway {
 
     @Override
     public MetaMediaInfo obterMediaInfo(String mediaId, String phoneNumberId) {
-        String url = baseUrl + "/" + mediaId + "?phone_number_id=" + phoneNumberId;
+        String url = baseUrl + "/" + mediaId;
 
         RetrieveMediaResponseDto resp = rest.get()
                 .uri(url)
