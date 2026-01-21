@@ -2,6 +2,7 @@ package br.com.newcred.adapters.meta;
 
 import br.com.newcred.adapters.dto.RetrieveMediaResponseDto;
 import br.com.newcred.application.usecase.port.IMetaMediaGateway;
+import br.com.newcred.application.usecase.port.IMetaTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -13,24 +14,24 @@ public class WhatsAppCloudApiClientMediaDownload implements IMetaMediaGateway {
 
     private final RestClient rest;
     private final String baseUrl;
+    private final IMetaTokenProvider iMetaTokenProvider;
 
     public WhatsAppCloudApiClientMediaDownload(
             RestClient.Builder builder,
             @Value("${meta.base-url:https://graph.facebook.com}") String baseUrl,
             @Value("${meta.version}") String version,
-            @Value("${meta.token}") String token
+            IMetaTokenProvider iMetaTokenProvider
     ) {
         this.baseUrl = baseUrl + "/" + version;
-        this.rest = builder.defaultHeader("Authorization", "Bearer " + token).build();
+        this.iMetaTokenProvider = iMetaTokenProvider;
+        this.rest = builder.build();
     }
 
     @Override
     public MetaMediaInfo obterMediaInfo(String mediaId, String phoneNumberId) {
-        String url = baseUrl + "/" + mediaId + "?phone_number_id=" + phoneNumberId;
+        String url = baseUrl + "/" + mediaId;
 
-        RetrieveMediaResponseDto resp = rest.get()
-                .uri(url)
-                .header("Accept", "application/json")
+        RetrieveMediaResponseDto resp = getWithAuth(phoneNumberId, url)
                 .retrieve()
                 .body(RetrieveMediaResponseDto.class);
 
@@ -42,9 +43,10 @@ public class WhatsAppCloudApiClientMediaDownload implements IMetaMediaGateway {
     }
 
     @Override
-    public InputStream baixarMediaStream(String mediaUrl) {
+    public InputStream baixarMediaStream(String mediaUrl, String phoneNumberId) {
         var resource = rest.get()
                 .uri(mediaUrl)
+                .header("Authorization", "Bearer " + iMetaTokenProvider.getToken(phoneNumberId))
                 .retrieve()
                 .body(org.springframework.core.io.Resource.class);
 
@@ -55,5 +57,15 @@ public class WhatsAppCloudApiClientMediaDownload implements IMetaMediaGateway {
             throw new RuntimeException("Erro lendo stream da mídia", e);
         }
     }
+
+
+    private RestClient.RequestHeadersSpec<?> getWithAuth(String phoneNumberId, String url) {
+        String token = iMetaTokenProvider.getToken(phoneNumberId);
+        return rest.get()
+                .uri(url)
+                .header("Authorization", "Bearer " + token)
+                .header("Accept", "application/json");
+    }
+
 }
 

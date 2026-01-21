@@ -63,8 +63,6 @@ public class UiController {
         return ResponseEntity.noContent().build();
     }
 
-
-
     @GetMapping("/{id}/mensagens")
     public List<MensagemDTO> listar(@PathVariable("id") long conversaId) {
         return mensagemRepository.listarPorConversa(conversaId);
@@ -74,7 +72,6 @@ public class UiController {
     public MensagensResponseDto enviar(@RequestBody MensagensRequestDto req) {
         return enviarMensagemUseCase.enviar(req, req.phoneNumberId());
     }
-
 
     @GetMapping("/{id}/media")
     public ResponseEntity<InputStreamResource> baixar(@PathVariable long id) {

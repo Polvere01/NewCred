@@ -1,5 +1,6 @@
 package br.com.newcred.adapters.meta;
 
+import br.com.newcred.application.usecase.port.IMetaTokenProvider;
 import br.com.newcred.application.usecase.port.IWhatsAppCloudClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -16,17 +17,17 @@ import java.util.Map;
 public class WhatsAppCloudDisparoClient implements IWhatsAppCloudClient {
 
     private final RestTemplate rest;
-    private final String token;
     private final String version;
+    private final IMetaTokenProvider iMetaTokenProvider;
 
     public WhatsAppCloudDisparoClient(
             RestTemplateBuilder builder,
-            @Value("${meta.token}") String token,
-            @Value("${meta.version}") String version
+            @Value("${meta.version}") String version,
+            IMetaTokenProvider iMetaTokenProvider
     ) {
         this.rest = builder.build();
-        this.token = token;
         this.version = version;
+        this.iMetaTokenProvider = iMetaTokenProvider;
     }
 
     @Override
@@ -62,7 +63,7 @@ public class WhatsAppCloudDisparoClient implements IWhatsAppCloudClient {
         );
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
+        headers.setBearerAuth(iMetaTokenProvider.getToken(phoneNumberId));
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         var req = new HttpEntity<>(body, headers);
@@ -97,7 +98,7 @@ public class WhatsAppCloudDisparoClient implements IWhatsAppCloudClient {
         );
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
+        headers.setBearerAuth(iMetaTokenProvider.getToken(phoneNumberId));
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         var req = new HttpEntity<>(body, headers);

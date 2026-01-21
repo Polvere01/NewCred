@@ -27,6 +27,7 @@ meta:
   base-url: https://graph.facebook.com
   version: v22.0
   token: ${META_TOKEN}
+  secret: ${META_TOKEN_SECRET}
 
 app:
   cors:
