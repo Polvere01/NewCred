@@ -1,4 +1,13 @@
-FROM eclipse-temurin:21-jdk
+# ===== BUILD =====
+FROM eclipse-temurin:21-jdk AS build
+
+WORKDIR /app
+COPY . .
+
+RUN chmod +x mvnw && ./mvnw clean package -DskipTests
+
+# ===== RUNTIME =====
+FROM eclipse-temurin:21-jre
 
 # instala ffmpeg
 RUN apt-get update \
@@ -6,9 +15,10 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY . .
 
-RUN chmod +x mvnw && ./mvnw clean package -DskipTests
+COPY --from=build /app/target/*.jar app.jar
+
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=60 -XX:InitialRAMPercentage=25 -XX:+UseG1GC"
 
 EXPOSE 8080
-CMD ["sh", "-c", "java -jar target/*.jar"]
+CMD ["java", "-jar", "app.jar"]
