@@ -115,7 +115,7 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
                     waClient.enviarTemplate(template, telefone, primeiroNome, cpf, valorContrato, phoneNumberId);
                     enviados++;
 
-                    Thread.sleep(200); // ajusta depois
+                    Thread.sleep(5000); // ajusta depois
                 } catch (Exception ex) {
                     erros.add(new FalhaDto(telefone, nomeRaw, ex.getMessage()));
                 }
@@ -174,7 +174,7 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
                     System.out.println(" Disparando para " + telefone + " (" + primeiroNome + ")");
                     waClient.enviarTemplate(template, telefone, primeiroNome, phoneNumberId);
                     enviados++;
-                    Thread.sleep(120);
+                    Thread.sleep(5000)
                 } catch (Exception ex) {
                     erros.add(new FalhaDto(telefone, nomeRaw, ex.getMessage()));
                 }
