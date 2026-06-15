@@ -115,7 +115,7 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
                     waClient.enviarTemplate(template, telefone, primeiroNome, cpf, valorContrato, phoneNumberId);
                     enviados++;
 
-                    Thread.sleep(5000); // ajusta depois
+                    Thread.sleep(20000); // ajusta depois
                 } catch (Exception ex) {
                     erros.add(new FalhaDto(telefone, nomeRaw, ex.getMessage()));
                 }
