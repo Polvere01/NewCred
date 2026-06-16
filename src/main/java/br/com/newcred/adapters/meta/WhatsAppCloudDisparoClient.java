@@ -30,49 +30,48 @@ public class WhatsAppCloudDisparoClient implements IWhatsAppCloudClient {
         this.iMetaTokenProvider = iMetaTokenProvider;
     }
 
-    @Override
-    public void enviarTemplate(
-            String templateName,
-            String to,
-            String firstName,
-            String cpf,
-            String valorContrato,
-            String phoneNumberId
-    ) {
-        String url = "https://graph.facebook.com/" + version + "/" + phoneNumberId + "/messages";
-
-        Map<String, Object> body = Map.of(
-                "messaging_product", "whatsapp",
-                "recipient_type", "individual",
-                "to", to,
-                "type", "template",
-                "template", Map.of(
-                        "name", templateName,
-                        "language", Map.of("code", "pt_BR"),
-                        "components", List.of(
-                                Map.of(
-                                        "type", "body",
-                                        "parameters", List.of(
-                                                Map.of("type", "text", "text", firstName),
-                                                // Map.of("type", "text", "text", formatarCpf(cpf)),
-                                                Map.of("type", "text", "text", valorContrato)
-                                        )
-                                )
-                        )
-                )
-        );
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(iMetaTokenProvider.getToken(phoneNumberId));
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        var req = new HttpEntity<>(body, headers);
-
-        var resp = rest.postForEntity(url, req, String.class);
-        if (!resp.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Meta retornou " + resp.getStatusCode() + ": " + resp.getBody());
-        }
-    }
+//    @Override
+//    public void enviarTemplate(
+//            String templateName,
+//            String to,
+//            String firstName,
+//            String cpf,
+//            String valorContrato,
+//            String phoneNumberId
+//    ) {
+//        String url = "https://graph.facebook.com/" + version + "/" + phoneNumberId + "/messages";
+//
+//        Map<String, Object> body = Map.of(
+//                "messaging_product", "whatsapp",
+//                "recipient_type", "individual",
+//                "to", to,
+//                "type", "template",
+//                "template", Map.of(
+//                        "name", templateName,
+//                        "language", Map.of("code", "pt_BR"),
+//                        "components", List.of(
+//                                Map.of(
+//                                        "type", "body",
+//                                        "parameters", List.of(
+//                                                Map.of("type", "text", "text", firstName)
+//                                                // Map.of("type", "text", "text", formatarCpf(cpf)),
+//                                        )
+//                                )
+//                        )
+//                )
+//        );
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setBearerAuth(iMetaTokenProvider.getToken(phoneNumberId));
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//        var req = new HttpEntity<>(body, headers);
+//
+//        var resp = rest.postForEntity(url, req, String.class);
+//        if (!resp.getStatusCode().is2xxSuccessful()) {
+//            throw new RuntimeException("Meta retornou " + resp.getStatusCode() + ": " + resp.getBody());
+//        }
+//    }
 
 
     public void enviarTemplate(String templateName, String to, String firstName, String phoneNumberId) {

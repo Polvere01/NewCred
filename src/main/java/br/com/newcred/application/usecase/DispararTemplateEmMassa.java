@@ -71,9 +71,6 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
             if (colTelefone < 0 || colNome < 0) {
                 throw new IllegalArgumentException("Cabeçalho precisa ter: telefone e nome");
             }
-            if (colCpf < 0 || colValorContrato < 0) {
-                throw new IllegalArgumentException("Cabeçalho precisa ter: cpf e valorContrato");
-            }
 
             for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                 var row = sheet.getRow(r);
@@ -81,8 +78,6 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
 
                 String telRaw = formatter.formatCellValue(row.getCell(colTelefone)).trim();
                 String nomeRaw = formatter.formatCellValue(row.getCell(colNome)).trim();
-                String cpfRaw = formatter.formatCellValue(row.getCell(colCpf)).trim();
-                String valorContratoRaw = formatter.formatCellValue(row.getCell(colValorContrato)).trim();
 
                 if (telRaw.isBlank() || nomeRaw.isBlank()) continue;
 
@@ -91,28 +86,20 @@ public class DispararTemplateEmMassa implements IDispararTemplateEmMassa {
                 String telefone = normalizarTelefoneBR(telRaw);
                 String primeiroNome = primeiroNome(nomeRaw);
 
-                // cpf só dígitos (sem ponto/traço)
-                String cpf = cpfRaw.replaceAll("\\D", "");
-                // valorContrato: deixa como vem (ex: "4.153,69") ou normaliza depois
-                String valorContrato = valorContratoRaw;
+//                // cpf só dígitos (sem ponto/traço)
+//                String cpf = cpfRaw.replaceAll("\\D", "");
+//                // valorContrato: deixa como vem (ex: "4.153,69") ou normaliza depois
+//                String valorContrato = valorContratoRaw;
 
                 if (telefone == null) {
                     erros.add(new FalhaDto(telRaw, nomeRaw, "Telefone inválido"));
-                    continue;
-                }
-                if (cpf.isBlank()) {
-                    erros.add(new FalhaDto(telefone, nomeRaw, "CPF vazio/inválido"));
-                    continue;
-                }
-                if (valorContrato.isBlank()) {
-                    erros.add(new FalhaDto(telefone, nomeRaw, "valorContrato vazio"));
                     continue;
                 }
 
                 try {
                     // ✅ SEM HARDCODE: usa o phoneNumberId recebido
                     // ✅ aqui assume que teu client vai aceitar cpf e valorContrato
-                    waClient.enviarTemplate(template, telefone, primeiroNome, cpf, valorContrato, phoneNumberId);
+                    waClient.enviarTemplate(template, telefone, primeiroNome, phoneNumberId);
                     enviados++;
 
                     Thread.sleep(20000); // ajusta depois
