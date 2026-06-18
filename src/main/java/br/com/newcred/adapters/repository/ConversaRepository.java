@@ -36,17 +36,17 @@ public class ConversaRepository implements IConversaRepository {
     public void atribuirOperadorSeNulo(long conversaId, String phoneNumberId) {
 
         // 1) trava a linha da conversa e pega operador atual
-        Long operadorAtual = jdbc.queryForObject("""
+        Long operadorAtual = buscarLongOuNulo("""
             select operador_id
             from conversas
             where id = ?
             for update
-        """, Long.class, conversaId);
+        """, conversaId);
 
         if (operadorAtual != null) return; // já atribuído
 
         // 2) escolhe próximo operador (round-robin por last_assigned_at)
-        Long opId = jdbc.queryForObject("""
+        Long opId = buscarLongOuNulo("""
           select o.id
           from operadores o
           where o.ativo = true
@@ -60,7 +60,7 @@ public class ConversaRepository implements IConversaRepository {
           order by o.last_assigned_at nulls first, o.id
           limit 1
           for update of o skip locked
-        """, Long.class, phoneNumberId);
+        """, phoneNumberId);
 
         if (opId == null) return; // sem operador disponível
 
@@ -80,5 +80,9 @@ public class ConversaRepository implements IConversaRepository {
             set last_assigned_at = now(), updated_at = now()
             where id = ?
         """, opId);
+    }
+
+    private Long buscarLongOuNulo(String sql, Object... args) {
+        return jdbc.query(sql, rs -> rs.next() ? rs.getObject(1, Long.class) : null, args);
     }
 }
