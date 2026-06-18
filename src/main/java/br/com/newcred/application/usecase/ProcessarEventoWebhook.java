@@ -25,6 +25,8 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
     private final static String IMAGE = "image";
     private final static String DOCUMENT = "document";
     private final static String VIDEO = "video";
+    private final static String BUTTON = "button";
+    private final static String INTERACTIVE = "interactive";
 
     private final IContatoRepository contatoRepo;
     private final IConversaRepository conversaRepo;
@@ -99,15 +101,15 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
         if (wamid == null || wamid.isBlank()) return;
 
         String from = msg.from();
-        String texto = (msg.text() != null) ? msg.text().body() : null;
+        String texto = extrairTextoMensagem(msg);
 
         long ts = 0L;
         if (msg.timestamp() != null && !msg.timestamp().isBlank()) {
             ts = Long.parseLong(msg.timestamp());
         }
         //TODO criar um estrategy
-        if (TEXTO.equals(msg.type())) {
-            mensagemRepo.salvarEntrada(conversaId, wamid, from, texto, ts, enviadoEm, phoneNumberId   );
+        if (TEXTO.equals(msg.type()) || BUTTON.equals(msg.type()) || INTERACTIVE.equals(msg.type())) {
+            mensagemRepo.salvarEntrada(conversaId, wamid, from, texto, ts, enviadoEm, phoneNumberId);
         }
 
         if (AUDIO.equals(msg.type())) {
@@ -168,6 +170,41 @@ public class ProcessarEventoWebhook implements IProcessarEventoWebhook {
             );
         }
 
+    }
+
+    private static String extrairTextoMensagem(MessageDTO msg) {
+        if (msg == null) return null;
+
+        if (msg.text() != null && msg.text().body() != null) {
+            return msg.text().body();
+        }
+
+        if (msg.button() != null) {
+            if (msg.button().text() != null && !msg.button().text().isBlank()) {
+                return msg.button().text();
+            }
+            return msg.button().payload();
+        }
+
+        if (msg.interactive() != null) {
+            if (msg.interactive().button_reply() != null) {
+                var buttonReply = msg.interactive().button_reply();
+                if (buttonReply.title() != null && !buttonReply.title().isBlank()) {
+                    return buttonReply.title();
+                }
+                return buttonReply.id();
+            }
+
+            if (msg.interactive().list_reply() != null) {
+                var listReply = msg.interactive().list_reply();
+                if (listReply.title() != null && !listReply.title().isBlank()) {
+                    return listReply.title();
+                }
+                return listReply.id();
+            }
+        }
+
+        return null;
     }
 
     private void processarStatus(StatusDTO st) {
